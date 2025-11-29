@@ -15,22 +15,22 @@ import Partners from './components/Partners';
 import Footer from './components/Footer';
 
 // Types
-import { SessionStatus } from "@/app/types";
+import { SessionStatus } from "./types";
 import type { RealtimeAgent } from '@openai/agents/realtime';
 
 // Context providers & hooks
-import { useTranscript } from "@/app/contexts/TranscriptContext";
-import { useEvent } from "@/app/contexts/EventContext";
+import { useTranscript } from "./contexts/TranscriptContext";
+import { useEvent } from "./contexts/EventContext";
 import { useRealtimeSession } from "./hooks/useRealtimeSession";
-import { createModerationGuardrail } from "@/app/agentConfigs/guardrails";
+import { createModerationGuardrail } from "./agentConfigs/guardrails";
 
 // Agent configs
-import { allAgentSets, defaultAgentSetKey } from "@/app/agentConfigs";
-import { customerServiceRetailScenario } from "@/app/agentConfigs/customerServiceRetail";
-import { chatSupervisorScenario } from "@/app/agentConfigs/chatSupervisor";
-import { customerServiceRetailCompanyName } from "@/app/agentConfigs/customerServiceRetail";
-import { chatSupervisorCompanyName } from "@/app/agentConfigs/chatSupervisor";
-import { simpleHandoffScenario } from "@/app/agentConfigs/simpleHandoff";
+import { allAgentSets, defaultAgentSetKey } from "./agentConfigs";
+import { customerServiceRetailScenario } from "./agentConfigs/customerServiceRetail";
+import { chatSupervisorScenario } from "./agentConfigs/chatSupervisor";
+import { customerServiceRetailCompanyName } from "./agentConfigs/customerServiceRetail";
+import { chatSupervisorCompanyName } from "./agentConfigs/chatSupervisor";
+import { simpleHandoffScenario } from "./agentConfigs/simpleHandoff";
 
 // Map used by connect logic for scenarios defined via the SDK.
 const sdkScenarioMap: Record<string, RealtimeAgent[]> = {

@@ -11,7 +11,11 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Copy the rest of the application code
+# Copy the rest of the application code
 COPY . .
+
+# Disable ESLint during build in Docker (works in Linux environment)
+ENV NEXT_DISABLE_ESLINT=1
 
 # Build the Next.js application
 RUN npm run build

@@ -1,5 +1,5 @@
 import React from "react";
-import { SessionStatus } from "@/app/types";
+import { SessionStatus } from "../types";
 import { Phone, PhoneOff, Loader2 } from "lucide-react";
 
 interface BottomToolbarProps {

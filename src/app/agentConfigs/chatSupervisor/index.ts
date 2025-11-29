@@ -125,27 +125,29 @@ export const saveClientInformation = tool({
     }
   }
 
-  // Save to JSON file
-  try {
-    const fs = require('fs');
-    const path = require('path');
-    
-    // Create a timestamp for the filename
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `client-info-${timestamp}.json`;
-    const filepath = path.join(process.cwd(), 'data', filename);
-    
-    // Ensure the data directory exists
-    const dataDir = path.join(process.cwd(), 'data');
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
+  // Save to JSON file (server-side only)
+  if (typeof window === 'undefined') {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+
+      // Create a timestamp for the filename
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `client-info-${timestamp}.json`;
+      const filepath = path.join(process.cwd(), 'data', filename);
+
+      // Ensure the data directory exists
+      const dataDir = path.join(process.cwd(), 'data');
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+
+      // Write the data to JSON file
+      fs.writeFileSync(filepath, JSON.stringify(clientParams, null, 2));
+      console.log('Successfully saved client information to JSON file:', filepath);
+    } catch (fileError) {
+      console.error('Error saving to JSON file:', fileError);
     }
-    
-    // Write the data to JSON file
-    fs.writeFileSync(filepath, JSON.stringify(clientParams, null, 2));
-    console.log('Successfully saved client information to JSON file:', filepath);
-  } catch (fileError) {
-    console.error('Error saving to JSON file:', fileError);
   }
 
   if (!supabaseInitialized || !supabase) {
@@ -461,23 +463,25 @@ export const handleConversationClosure = tool({
     
     // Save to JSON file
     try {
-      const fs = require('fs');
-      const path = require('path');
-      
-      // Create a timestamp for the filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `conversation-closure-${timestamp}.json`;
-      const filepath = path.join(process.cwd(), 'data', filename);
-      
-      // Ensure the data directory exists
-      const dataDir = path.join(process.cwd(), 'data');
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
+      if (typeof window === 'undefined') {
+        const fs = await import('fs');
+        const path = await import('path');
+
+        // Create a timestamp for the filename
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `conversation-closure-${timestamp}.json`;
+        const filepath = path.join(process.cwd(), 'data', filename);
+
+        // Ensure the data directory exists
+        const dataDir = path.join(process.cwd(), 'data');
+        if (!fs.existsSync(dataDir)) {
+          fs.mkdirSync(dataDir, { recursive: true });
+        }
+
+        // Write the data to JSON file
+        fs.writeFileSync(filepath, JSON.stringify(params, null, 2));
+        console.log('Successfully saved conversation closure data to JSON file:', filepath);
       }
-      
-      // Write the data to JSON file
-      fs.writeFileSync(filepath, JSON.stringify(params, null, 2));
-      console.log('Successfully saved conversation closure data to JSON file:', filepath);
     } catch (fileError) {
       console.error('Error saving conversation closure to JSON file:', fileError);
     }
