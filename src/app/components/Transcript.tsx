@@ -31,25 +31,24 @@ function Transcript({
 
   function scrollToBottom() {
     if (transcriptRef.current) {
-      transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
+      // Use requestAnimationFrame to ensure DOM is updated before scrolling
+      requestAnimationFrame(() => {
+        // Adding a small delay to ensure content is fully rendered
+        setTimeout(() => {
+          if (transcriptRef.current) {
+            transcriptRef.current.scrollTo({
+              top: transcriptRef.current.scrollHeight,
+              behavior: "smooth"
+            });
+          }
+        }, 0);
+      });
     }
   }
 
   useEffect(() => {
-    const hasNewMessage = transcriptItems.length > prevLogs.length;
-    const hasUpdatedMessage = transcriptItems.some((newItem, index) => {
-      const oldItem = prevLogs[index];
-      return (
-        oldItem &&
-        (newItem.title !== oldItem.title || newItem.data !== oldItem.data)
-      );
-    });
-
-    if (hasNewMessage || hasUpdatedMessage) {
-      scrollToBottom();
-    }
-
-    setPrevLogs(transcriptItems);
+    // Scroll to bottom when transcript items change
+    scrollToBottom();
   }, [transcriptItems]);
 
   // Autofocus on text box input on load
@@ -71,32 +70,33 @@ function Transcript({
   };
 
   return (
-    <div className="flex flex-col flex-1 bg-white min-h-0 rounded-xl    hidden">
-      <div className="flex flex-col flex-1 min-h-0">
+    <div className="flex flex-col bg-white min-h-0 rounded-xl font-montserrat h-full">
+      <div className="flex flex-col flex-1 min-h-0 h-full">
         <div className="flex items-center justify-between px-6 py-3 sticky top-0 z-10 text-base border-b bg-white rounded-t-xl">
-          <span className="font-semibold">Transcript</span>
+          <span className="font-semibold text-dark-800">Transcript</span>
           <div className="flex gap-x-2">
             <button
               onClick={handleCopyTranscript}
-              className="w-24 text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center gap-x-1"
+              className="w-24 text-sm px-3 py-1 rounded-md bg-primary-100 hover:bg-primary-200 text-primary-500 flex items-center justify-center gap-x-1 hidden"
             >
               <ClipboardCopyIcon />
               {justCopied ? "Copied!" : "Copy"}
             </button>
             <button
               onClick={downloadRecording}
-              className="w-40 text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center gap-x-1"
+              className="w-40 text-sm px-3 py-1 rounded-md bg-primary-100 hover:bg-primary-200 text-primary-500 flex items-center justify-center gap-x-1 hidden"
             >
               <DownloadIcon />
               <span>Download Audio</span>
             </button>
           </div>
+          
         </div>
 
         {/* Transcript Content */}
         <div
           ref={transcriptRef}
-          className="overflow-auto p-4 flex flex-col gap-y-4 h-full"
+          className="overflow-y-auto p-4 flex flex-col gap-y-4 flex-1 min-h-0"
         >
           {[...transcriptItems]
             .sort((a, b) => a.createdAtMs - b.createdAtMs)
@@ -119,11 +119,28 @@ function Transcript({
 
             if (type === "MESSAGE") {
               const isUser = role === "user";
+              
+              // Show typing indicator for assistant messages that are in progress
+              if (!isUser && status === "IN_PROGRESS" && (!title || title.trim() === "")) {
+                return (
+                  <div key={itemId} className="flex justify-start items-start">
+                    <div className="bg-primary-50 text-dark-800 max-w-lg p-3 rounded-t-xl rounded-b-xl">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce-custom"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce-custom" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce-custom" style={{ animationDelay: '0.4s' }}></div>
+                        <span className="ml-2 text-sm">Thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              
               const containerClasses = `flex justify-end flex-col ${
                 isUser ? "items-end" : "items-start"
               }`;
               const bubbleBase = `max-w-lg p-3 ${
-                isUser ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-black"
+                isUser ? "bg-dark-800 text-white" : "bg-primary-50 text-dark-800"
               }`;
               const isBracketedMessage =
                 title.startsWith("[") && title.endsWith("]");
@@ -162,38 +179,8 @@ function Transcript({
                 </div>
               );
             } else if (type === "BREADCRUMB") {
-              return (
-                <div
-                  key={itemId}
-                  className="flex flex-col justify-start items-start text-gray-500 text-sm"
-                >
-                  <span className="text-xs font-mono">{timestamp}</span>
-                  <div
-                    className={`whitespace-pre-wrap flex items-center font-mono text-sm text-gray-800 ${
-                      data ? "cursor-pointer" : ""
-                    }`}
-                    onClick={() => data && toggleTranscriptItemExpand(itemId)}
-                  >
-                    {data && (
-                      <span
-                        className={`text-gray-400 mr-1 transform transition-transform duration-200 select-none font-mono ${
-                          expanded ? "rotate-90" : "rotate-0"
-                        }`}
-                      >
-                        ▶
-                      </span>
-                    )}
-                    {title}
-                  </div>
-                  {expanded && data && (
-                    <div className="text-gray-800 text-left">
-                      <pre className="border-l-2 ml-1 border-gray-200 whitespace-pre-wrap break-words font-mono text-xs mb-2 mt-2 pl-2">
-                        {JSON.stringify(data, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              );
+              // Hide breadcrumb items to show only the typing indicator
+              return null;
             } else {
               // Fallback if type is neither MESSAGE nor BREADCRUMB
               return (
@@ -221,13 +208,14 @@ function Transcript({
               onSendMessage();
             }
           }}
-          className="flex-1 px-4 py-2 focus:outline-none"
-          placeholder="Type a message..."
+          className="flex-1 px-4 py-2 focus:outline-none text-dark-800 bg-white border border-primary-200 rounded-lg"
+          placeholder={canSend ? "Type your message or use voice..." : "Connect to start chatting..."}
+          disabled={!canSend}
         />
         <button
           onClick={onSendMessage}
           disabled={!canSend || !userText.trim()}
-          className="bg-gray-900 text-white rounded-full px-2 py-2 disabled:opacity-50"
+          className="bg-primary-500 text-white rounded-full px-2 py-2 disabled:opacity-50 hover:bg-primary-600"
         >
           <Image src="arrow.svg" alt="Send" width={24} height={24} />
         </button>

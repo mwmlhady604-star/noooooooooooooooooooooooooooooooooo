@@ -51,15 +51,15 @@ function BottomToolbar({
 }
 
  function getConnectionButtonClasses() {
-  const baseClasses = 'text-white text-base p-2 w-36 rounded-md h-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const baseClasses = 'text-white text-base p-2 w-36 rounded-md h-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 font-montserrat';
   const cursorClass = isConnecting ? 'cursor-not-allowed' : 'cursor-pointer';
 
   if (isConnected) {
     // Connected -> label "Disconnect" -> red
     return `${baseClasses} bg-red-600 hover:bg-red-700 focus:ring-red-500 ${cursorClass}`;
   }
-  // Disconnected or connecting -> label is either "Connect" or "Connecting" -> black
-  return `${baseClasses} bg-black hover:bg-gray-900 focus:ring-gray-500 ${cursorClass}`;
+  // Disconnected or connecting -> label is either "Connect" or "Connecting" -> primary color
+  return `${baseClasses} bg-primary-500 hover:bg-primary-600 focus:ring-primary-500 ${cursorClass}`;
 }
 const BottomToolbar: React.FC<BottomToolbarProps> = ({ onToggleConnection }) => {
   return (
@@ -105,9 +105,9 @@ const BottomToolbar: React.FC<BottomToolbarProps> = ({ onToggleConnection }) => 
           onTouchEnd={handleTalkButtonUp}
           disabled={!isPTTActive}
           className={
-            (isPTTUserSpeaking ? "bg-gray-300" : "bg-gray-200") +
-            " py-1 px-4 cursor-pointer rounded-md" +
-            (!isPTTActive ? " bg-gray-100 text-gray-400" : "")
+            (isPTTUserSpeaking ? "bg-primary-300" : "bg-primary-200") +
+            " py-1 px-4 cursor-pointer rounded-md font-montserrat" +
+            (!isPTTActive ? " bg-primary-100 text-primary-300" : " text-dark-800")
           }
         >
           Talk
@@ -158,7 +158,7 @@ const BottomToolbar: React.FC<BottomToolbarProps> = ({ onToggleConnection }) => 
           id="codec-select"
           value={codec}
           onChange={handleCodecChange}
-          className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none cursor-pointer"
+          className="border border-primary-300 rounded-md px-2 py-1 focus:outline-none cursor-pointer text-dark-800 font-montserrat"
         >
           <option value="opus">Opus (48 kHz)</option>
           <option value="pcmu">PCMU (8 kHz)</option>

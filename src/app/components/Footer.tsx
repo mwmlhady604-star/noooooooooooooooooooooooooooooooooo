@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="bg-primary-900 text-white py-12">
+    <footer className="bg-dark-800 text-white py-12 font-montserrat">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Quick Links */}
@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
                 <NavItem
                   key={link.label}
                   href={link.href}
-                  className="text-primary-200 hover:text-white block"
+                  className="text-primary-500 hover:text-white block"
                 >
                   {link.label}
                 </NavItem>
@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
           {/* Contact */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
-            <div className="space-y-2 text-primary-200">
+            <div className="space-y-2 text-primary-500">
               <p>Email: info@companyregai.com</p>
               <p>Phone: +964 XXX XXX XXXX</p>
               <p>Office: Baghdad, Iraq</p>
@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
                 <a
                   key={social.name}
                   href={social.href}
-                  className="text-primary-200 hover:text-white transition-colors duration-200"
+                  className="text-primary-500 hover:text-white transition-colors duration-200"
                 >
                   {social.name}
                 </a>
@@ -76,7 +76,7 @@ const Footer: React.FC = () => {
                 <a
                   key={link.label}
                   href={link.href}
-                  className="text-primary-200 hover:text-white block transition-colors duration-200"
+                  className="text-primary-500 hover:text-white block transition-colors duration-200"
                 >
                   {link.label}
                 </a>
@@ -86,7 +86,7 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-primary-700 mt-8 pt-8 text-center text-primary-200">
+        <div className="border-t border-primary-500 mt-8 pt-8 text-center text-primary-500">
           <p>© 2025 CompanyReg AI. All rights reserved.</p>
         </div>
       </div>

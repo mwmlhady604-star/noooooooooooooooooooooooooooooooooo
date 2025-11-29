@@ -12,8 +12,6 @@ import BottomToolbar from "./components/BottomToolbar";
 import NavBar from './components/NavBar';
 import Hero from './components/Hero';
 import Partners from './components/Partners';
-import Marketing from './components/Marketing';
-import Services from './components/Services';
 import Footer from './components/Footer';
 
 // Types
@@ -488,9 +486,27 @@ function App() {
 
   const agentSetKey = searchParams.get("agentConfig") || "default";
 
+  // State for email reminder popup
+  const [showEmailReminder, setShowEmailReminder] = useState(false);
+
+  // Show email reminder popup when session connects
+  useEffect(() => {
+    if (sessionStatus === "CONNECTED") {
+      setShowEmailReminder(true);
+      
+      // Auto-hide the popup after 10 seconds
+      const timer = setTimeout(() => {
+        setShowEmailReminder(false);
+      }, 10000);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setShowEmailReminder(false);
+    }
+  }, [sessionStatus]);
+
   return (
-    
-   <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
     <NavBar onToggleConnection={onToggleConnection} />
 
     {/* WhatsApp-like Calling Interface */}
@@ -529,19 +545,128 @@ function App() {
       </div>
     )}
 
+    {/* Floating Action Button (FAB) for Connection */}
+    <button
+      onClick={onToggleConnection}
+      className={`fixed bottom-6 right-6 z-[9999] p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none ${
+        sessionStatus === "CONNECTED"
+          ? "bg-red-500 hover:bg-red-600"
+          : sessionStatus === "CONNECTING"
+          ? "bg-yellow-500 hover:bg-yellow-600"
+          : "bg-green-500 hover:bg-green-600"
+      }`}
+      aria-label={
+        sessionStatus === "CONNECTED"
+          ? "End Connection"
+          : sessionStatus === "CONNECTING"
+          ? "Connecting..."
+          : "Start Connection"
+      }
+    >
+      {sessionStatus === "CONNECTED" ? (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      ) : sessionStatus === "CONNECTING" ? (
+        <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </svg>
+      )}
+    </button>
+
+    {/* Floating Transcript Panel */}
+    {sessionStatus === "CONNECTED" && (
+      <div className="fixed bottom-24 right-6 z-[9998] w-96 h-96 bg-white rounded-xl shadow-2xl border border-gray-200">
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold">Transcript</h3>
+            <button 
+              onClick={() => setSessionStatus("DISCONNECTED")}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <Transcript 
+              userText={userText}
+              setUserText={setUserText}
+              onSendMessage={handleSendTextMessage}
+              canSend={sessionStatus === "CONNECTED"}
+              downloadRecording={downloadRecording}
+            />
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Email Reminder Popup */}
+    {showEmailReminder && (
+      <div className="fixed top-4 right-4 z-[10000] w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in-down">
+        <div className="p-4">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-yellow-800">Important</h3>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowEmailReminder(false)}
+              className="text-gray-400 hover:text-gray-500"
+            >
+              <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <div className="mt-2">
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Before ending the call,</span> please make sure you have received the email. If you don't see it in your inbox, kindly ask the AI agent to resend it.
+            </p>
+          </div>
+        </div>
+        <div className="bg-gray-50 px-4 py-3 rounded-b-lg">
+          <div className="flex justify-end">
+            <button
+              onClick={() => setShowEmailReminder(false)}
+              className="text-sm font-medium text-yellow-700 hover:text-yellow-800"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
 <main>
-        <Hero />
+        <Hero 
+          userText={userText}
+          setUserText={setUserText}
+          onSendMessage={handleSendTextMessage}
+          canSend={sessionStatus === "CONNECTED"}
+          downloadRecording={downloadRecording}
+        />
         <Partners />
-        <Marketing />
-        <Services />
       </main>
       <Footer />
-      <div className="p-5 text-lg font-semibold flex justify-between items-center hidden  ">
+      <div className="p-5 text-lg font-semibold flex justify-between items-center">
         <div
           className="flex items-center cursor-pointer"
           onClick={() => window.location.reload()}
         >
-          <div>
+          <div className="hidden">
             <Image
               src="/letter-r.svg"
               alt="OpenAI Logo"
@@ -553,8 +678,8 @@ function App() {
           <div>
             
           </div>
-        </div>
-        <div className="flex items-center">
+        </div >
+        <div className="flex items-center hidden">
           <label className="flex items-center text-base gap-1 mr-2 font-medium">
             Scenario
           </label>
@@ -582,7 +707,7 @@ function App() {
           </div>
 
           {agentSetKey && (
-            <div className="flex items-center ml-6">
+            <div className="flex items-center ml-6 hidden">
               <label className="flex items-center text-base gap-1 mr-2 font-medium">
                 Agent
               </label>
@@ -615,20 +740,6 @@ function App() {
             </div>
           )}
         </div>
-      </div>
-
-      <div className="flex flex-1 gap-2 px-2 overflow-hidden relative">
-        <Transcript
-          userText={userText}
-          setUserText={setUserText}
-          onSendMessage={handleSendTextMessage}
-          downloadRecording={downloadRecording}
-          canSend={
-            sessionStatus === "CONNECTED"
-          }
-        />
-
-        <Events isExpanded={isEventsPaneExpanded} />
       </div>
 
       <BottomToolbar

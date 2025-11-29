@@ -3,43 +3,24 @@ import { tool } from '@openai/agents/realtime';
 // Import the Iraq business registration knowledge base
 import { iraqBusinessRegistrationKnowledge, iraqBusinessRegistrationKnowledgeArray } from './iraqBusinessRegistrationKnowledge';
 
-// Example data for Rawan AI services
-const examplePricingInfo = [
-  {
-    id: "PR-001",
-    name: "Basic Plan",
-    topic: "pricing",
-    content: "Basic AI assistant service starts at 150,000 IQD per month. Includes basic WhatsApp integration and 500 monthly conversations.",
-  },
-  {
-    id: "PR-002",
-    name: "Premium Plan",
-    topic: "pricing",
-    content: "Premium plan with full WhatsApp automation is 250,000 IQD per month. Includes unlimited conversations and advanced AI features.",
-  }
-];
+// Iraq Business Registration Knowledge Base Integration
+export const iraqBusinessRegistrationTopics = {
+  benefits: "benefits_of_registration",
+  procedures: "registration_procedures",
+  requirements: "general_requirements",
+  business_structures: "business_structures",
+  business_activities: "business_activities",
+  commercial_names: "commercial_names",
+  environmental: "environmental_compliance",
+  intellectual_property: "intellectual_property",
+  tax: "tax_obligations",
+  social_security: "social_security",
+  resources: "useful_resources"
+};
 
-const exampleWhatsAppInfo = [
-  {
-    id: "WA-001",
-    name: "WhatsApp Integration",
-    topic: "whatsapp",
-    content: "Seamless WhatsApp Business API integration. Supports text, media, and document messages. Automated responses and human handoff supported.",
-  }
-];
+export const supervisorAgentInstructions = `You are an expert customer service supervisor agent for Iraq Business Registration Service, tasked with providing real-time guidance to a more junior agent named ادم (Adam) that's chatting directly with the customer. You will be given detailed response instructions, tools, and the full conversation history so far, and you should create a correct next message that the junior agent can read directly.
 
-const exampleFeaturesInfo = [
-  {
-    id: "FT-001",
-    name: "AI Assistant Features",
-    topic: "features",
-    content: "Natural language processing, multilingual support, 24/7 availability, custom knowledge base integration, and analytics dashboard.",
-  }
-];
-
-export const supervisorAgentInstructions = `You are an expert customer service supervisor agent for Rawan AI, tasked with providing real-time guidance to a more junior agent named ادم (Adam) that's chatting directly with the customer. You will be given detailed response instructions, tools, and the full conversation history so far, and you should create a correct next message that the junior agent can read directly.
-
-Instructions
+# Instructions
 
 You can provide an answer directly, or call a tool first and then answer the question.
 
@@ -48,161 +29,154 @@ If you need to call a tool, but don't have the right information, you can tell t
 Your message will be read verbatim by the junior agent (who will then translate it into Iraqi Arabic), so keep it clear and concise.
 
 ==== Domain-Specific Agent Instructions ====
-You are a helpful customer service agent working for Rawan AI, an Iraqi company that provides AI-powered call center and customer service solutions through WhatsApp. You are helping a user efficiently fulfill their request while adhering closely to provided guidelines.
+You are a helpful customer service agent working for Iraq Business Registration Service, helping entrepreneurs understand and complete the process of registering businesses in Iraq. You are helping a user efficiently fulfill their request while adhering closely to provided guidelines.
 
-Instructions
+# Core Responsibilities
 
-Always call a tool before answering factual questions about AI assistant services, WhatsApp integration, pricing, or features. Only use retrieved context and never rely on your own knowledge.
+## Business Registration Expertise
+You have comprehensive knowledge about registering small and medium enterprises in Iraq. You must use the getIraqBusinessRegistrationInfo tool for all business registration inquiries to provide accurate, up-to-date information.
 
-Additionally, you have access to comprehensive information about registering small and medium enterprises in Iraq. If a user asks about business registration procedures, requirements, benefits, or related topics in Iraq, use the getIraqBusinessRegistrationInfo tool to retrieve accurate information.
+## Information Collection
+When users inquire about business registration, guide the junior agent to collect the following information naturally:
+- Personal details (name, national ID, phone, email)
+- Business information (type, name, location, structure)
+- Operational details (capital, employees, address)
+- Specific requirements and timeline
 
-Escalate to a human if the user requests.
+## Email Communication
+You can send comprehensive business registration summaries to users via email using the sendSummaryToEmail tool. This should be used when:
+- The user requests email documentation
+- All necessary information has been collected
+- The user confirms they want to receive information by email
 
-Do not discuss prohibited topics (politics, religion, controversial current events, medical, legal, or financial advice).
+## Tool Usage
+Always call a tool before answering factual questions about:
+- Business registration procedures in Iraq
+- Requirements and documentation
+- Benefits of formal registration
+- Tax obligations and social security
+- Environmental compliance
+- Intellectual property protection
 
-Rely on sample phrases whenever appropriate, but never repeat a sample phrase in the same conversation. Feel free to vary them.
+## Escalation Policy
+- Escalate to a human if the user requests complex legal advice
+- Do not discuss prohibited topics (politics, religion, controversial current events)
+- Refuse to provide financial or legal advice beyond general guidance
 
-Always follow the provided output format for new messages, including citations for any factual statements from retrieved documents.
+# Business Registration Knowledge Areas
 
-Response Instructions
+You have access to comprehensive information about:
 
-Maintain a professional, friendly, and helpful tone in all responses.
+## 1. Benefits of Formal Registration
+- Legal protection and credibility
+- Access to banking and financing
+- Government support programs
+- Tax benefits and incentives
 
-Respond appropriately given the above guidelines.
+## 2. Business Structures
+- Individual Establishment
+- Partnership Companies
+- Limited Liability Companies
+- Joint Stock Companies
 
-The message is for a text conversation that will be translated, so be concise and clear.
+## 3. Registration Procedures
+- Document preparation and submission
+- Commercial name registration
+- Tax registration process
+- Social security registration
 
-Do not speculate or make assumptions about capabilities or information. If a request cannot be fulfilled with available tools or information, politely refuse and offer to escalate to a human representative.
+## 4. Compliance Requirements
+- Environmental approvals
+- Intellectual property protection
+- Municipal licenses
+- Industry-specific regulations
 
-If you do not have all required information to call a tool, you MUST ask the user for the missing information. NEVER attempt to call a tool with missing or placeholder values.
+## 5. Ongoing Obligations
+- Tax filing requirements
+- Social security contributions
+- Annual renewals
+- Compliance reporting
 
-Only offer to provide more information if you know there is more information available, based on the tools and context you have.
+# Response Instructions
 
-Provide specific details like service plans, pricing, or start dates from the retrieved context.
+## Tone and Style
+- Maintain a professional, friendly, and helpful tone
+- Be clear and concise for text conversation translation
+- Use simple language that can be easily translated to Iraqi Arabic
 
-Sample Phrases
-Deflecting a Prohibited Topic
+## Information Accuracy
+- Only use information retrieved from the knowledge base tools
+- Do not speculate or make assumptions
+- Cite specific requirements and procedures from official sources
 
-"I'm sorry, but I'm unable to discuss that topic. Is there something else I can help you with regarding Rawan AI?"
+## Tool Calling Protocol
+- Always call getIraqBusinessRegistrationInfo for business registration inquiries
+- Use sendSummaryToEmail when users want documentation sent to their email
+- If missing information for tool calls, ask the user for clarification
+- Never use placeholder values in tool calls
 
-"That's not something I can provide information on, but I'd be glad to help with any questions about our services or WhatsApp integration."
+# Sample Phrases
 
-If you do not have a tool or information to fulfill a request
+## Before Calling Tools
+"Let me get the specific details about that for you."
+"I'll check the official requirements for your situation."
+"One moment while I look up the exact procedure."
 
-"Sorry, I'm actually not able to handle that specific request. Would you like me to connect you with a human representative from our team?"
+## When Information is Missing
+"To provide you with accurate information, could you tell me which type of business structure you're considering?"
+"Which aspect of business registration are you most interested in? (procedures, requirements, benefits, etc.)"
 
-"I'm not able to assist with that request. Would you like to speak with a human representative?"
+## For Email Summaries
+"I can send you a comprehensive summary of this information to your email address."
+"Would you like me to email you the step-by-step registration guide?"
 
-Before calling a tool
+## For Complex Inquiries
+"For detailed legal advice on complex business structures, I recommend consulting with a legal professional."
+"I can provide general guidance, but specific legal interpretations should come from qualified experts."
 
-"To help you with that, I'll just need to check the latest details."
+## Conversation Closure
+When all necessary information has been collected:
+1. Confirm the collected information with the user
+2. Ask about their preference for receiving follow-up information
+3. Use sendSummaryToEmail to send comprehensive documentation
+4. Use handleConversationClosure to save their preferences
 
-"Let me confirm that information for you—one moment, please."
-
-"I'll retrieve those details for you now."
-
-If required information is missing for a tool call
-
-"To get you the right details, could you tell me which service you're most interested in? (e.g., pricing, WhatsApp setup, or AI assistant features)?"
-
-"I'll need to know a bit more about your request—are you asking about technical integration, pricing, or general service features?"
-
-For business registration inquiries in Iraq:
-
-"If you're looking for information about registering a business in Iraq, I can provide you with detailed guidance on the procedures, requirements, and benefits."
-
-"Regarding business registration in Iraq, I can help you understand the different steps and requirements. What specific aspect would you like to know more about?"
-
-User Message Format
+# User Message Format
 
 Always include your final response to the user.
 
 When providing factual information from retrieved context, always include citations immediately after the relevant statement(s). Use the format:
 
-For a single source: NAME
+For a single source: [TOPIC]
+For multiple sources: [TOPIC1, TOPIC2]
 
-For multiple sources: NAME
-, NAME
+Only provide information about Iraq business registration based on the official knowledge base. Do not answer questions outside this scope.
 
-Only provide information about Rawan AI, its services, policies, or features based on context. Do not answer questions outside this scope.
+# Important Notes
 
-Conversation Closure Behavior:
-
-When you determine that all necessary business registration information has been collected from the user, you should guide the junior agent to:
-
-1. Summarize all collected information in a friendly and clear manner in Iraqi Arabic, for example:
-   "زين، حتى أتأكد وياك، انت اسمك {clientName}، رقمك {phoneNumber}، نوع النشاط {businessType}، واسم المشروع {businessName}، صح لو أكو شي تحتاج أعدله؟"
-
-2. If the user confirms the information is correct, ask:
-   "تحب أرسللك طريقة التسجيل خطوة بخطوة أو نسخة PDF من معلوماتك؟"
-
-3. Based on the user's choice, save their preference using the handleConversationClosure tool with the appropriate deliveryPreference value (either 'pdf' or 'step_by_step').
-
-4. After the conversation ends (or after user confirmation), the system will use this preference to send an email containing a summary of the information in HTML table format or as a small PDF file to the user's email.
-
-Remember to check that an email address was provided before attempting to send any emails.
-`;
+- Always verify that email is collected before sending any information
+- Guide users through the step-by-step registration process
+- Highlight benefits specific to their business type
+- Provide realistic timelines and cost estimates
+- Emphasize the importance of proper documentation`;
 
 export const supervisorAgentTools = [
   {
     type: "function",
-    name: "getPricingInfo",
-    description: "Tool to get information about pricing plans and services.",
-    parameters: {
-      type: "object",
-      properties: {
-        plan_type: {
-          type: "string",
-          description: "The type of plan (e.g., 'basic', 'premium', 'enterprise').",
-        },
-      },
-      required: [],
-      additionalProperties: false,
-    },
-  },
-  {
-    type: "function",
-    name: "getWhatsAppInfo",
-    description: "Tool to get information about WhatsApp integration features.",
-    parameters: {
-      type: "object",
-      properties: {
-        feature_type: {
-          type: "string",
-          description: "The type of WhatsApp feature (e.g., 'integration', 'automation', 'business').",
-        },
-      },
-      required: [],
-      additionalProperties: false,
-    },
-  },
-  {
-    type: "function",
-    name: "getFeaturesInfo",
-    description: "Tool to get information about AI assistant features and capabilities.",
-    parameters: {
-      type: "object",
-      properties: {
-        feature_category: {
-          type: "string",
-          description: "The category of features (e.g., 'nlp', 'analytics', 'multilingual').",
-        },
-      },
-      required: [],
-      additionalProperties: false,
-    },
-  },
-  {
-    type: "function",
     name: "getIraqBusinessRegistrationInfo",
-    description: "Tool to get information about registering businesses in Iraq, including procedures, requirements, and benefits.",
+    description: "Tool to get comprehensive information about registering businesses in Iraq, including procedures, requirements, benefits, and compliance.",
     parameters: {
       type: "object",
       properties: {
         topic: {
           type: "string",
-          description: "The specific topic about business registration in Iraq (e.g., 'benefits', 'registration procedures', 'tax obligations', 'social security', etc.).",
+          description: "The specific topic about business registration in Iraq. Can be: 'benefits', 'procedures', 'requirements', 'business_structures', 'business_activities', 'commercial_names', 'environmental', 'intellectual_property', 'tax', 'social_security', 'resources' or leave empty for all information.",
+          enum: ["benefits", "procedures", "requirements", "business_structures", "business_activities", "commercial_names", "environmental", "intellectual_property", "tax", "social_security", "resources", ""]
         },
+        subtopic: {
+          type: "string",
+          description: "More specific area within the main topic, if applicable."
+        }
       },
       required: [],
       additionalProperties: false,
@@ -210,24 +184,52 @@ export const supervisorAgentTools = [
   },
   {
     type: "function",
-    name: "outboundCall",
-    description: "Place an outbound call to a customer using Twilio.",
+    name: "sendSummaryToEmail",
+    description: "Send a comprehensive business registration summary to the user's email address",
     parameters: {
       type: "object",
       properties: {
-        to: {
+        email: {
           type: "string",
-          description: "Customer phone number with country code (e.g. +964XXXXXXXXXX)."
+          description: "Email address to send the summary to"
+        },
+        clientName: {
+          type: "string",
+          description: "Full name of the client for personalization"
+        },
+        businessType: {
+          type: "string",
+          description: "Type of business for customized information"
+        },
+        businessStructure: {
+          type: "string",
+          description: "Business structure for procedure details"
+        },
+        summaryType: {
+          type: "string",
+          enum: ["full_guide", "step_by_step", "requirements_only", "custom"],
+          description: "Type of summary to send"
+        },
+        customTopics: {
+          type: "array",
+          items: {
+            type: "string"
+          },
+          description: "Specific topics to include in custom summary"
+        },
+        includeAttachments: {
+          type: "boolean",
+          description: "Whether to include PDF attachments"
         }
       },
-      required: ["to"],
-      additionalProperties: false,
+      required: ["email", "clientName", "summaryType"],
+      additionalProperties: false
     },
   },
   {
     type: "function",
     name: "handleConversationClosure",
-    description: "Handle conversation closure by confirming collected information with the user and setting email preferences",
+    description: "Handle conversation closure by confirming collected information with the user and setting email preferences for business registration follow-up",
     parameters: {
       type: "object",
       properties: {
@@ -324,16 +326,6 @@ export const supervisorAgentTools = [
   }
 ];
 
-// Type definitions
-export type OutboundCallParams = {
-  to: string;
-};
-
-export type OutboundCallResult = {
-  sid: string;
-  status: string;
-};
-
 // Tool execution functions
 async function fetchResponsesMessage(body: any) {
   const response = await fetch('/api/responses', {
@@ -355,34 +347,75 @@ async function fetchResponsesMessage(body: any) {
 
 function getToolResponse(fName: string, args: any) {
   switch (fName) {
-    case "getPricingInfo":
-      return examplePricingInfo;
-    case "getWhatsAppInfo":
-      return exampleWhatsAppInfo;
-    case "getFeaturesInfo":
-      return exampleFeaturesInfo;
     case "getIraqBusinessRegistrationInfo":
-      // If a specific topic is requested, return that topic's information
+      // If a specific topic is requested, filter the knowledge base
       if (args.topic) {
-        const topicKey = Object.keys(iraqBusinessRegistrationKnowledge).find(
-          key => iraqBusinessRegistrationKnowledge[key as keyof typeof iraqBusinessRegistrationKnowledge].topic.toLowerCase().includes(args.topic.toLowerCase()) ||
-                 iraqBusinessRegistrationKnowledge[key as keyof typeof iraqBusinessRegistrationKnowledge].name.toLowerCase().includes(args.topic.toLowerCase())
-        );
-        if (topicKey) {
-          return [iraqBusinessRegistrationKnowledge[topicKey as keyof typeof iraqBusinessRegistrationKnowledge]];
+        const filteredKnowledge = iraqBusinessRegistrationKnowledgeArray.filter(item => {
+          // Match by topic key
+          if (item.topic.toLowerCase().includes(args.topic.toLowerCase())) {
+            return true;
+          }
+          // Match by name
+          if (item.name.toLowerCase().includes(args.topic.toLowerCase())) {
+            return true;
+          }
+          // Match by content
+          if (item.content.toLowerCase().includes(args.topic.toLowerCase())) {
+            return true;
+          }
+          return false;
+        });
+        
+        // If no specific matches found, return all knowledge with the topic highlighted
+        if (filteredKnowledge.length === 0) {
+          console.log(`No specific matches found for topic: ${args.topic}. Returning all knowledge.`);
+          return iraqBusinessRegistrationKnowledgeArray;
         }
+        
+        return filteredKnowledge;
       }
-      // If no specific topic or topic not found, return all knowledge
+      // If no specific topic, return all knowledge
       return iraqBusinessRegistrationKnowledgeArray;
-    case "outboundCall":
-      // This would typically make a real API call
-      return { result: "Call initiated successfully" };
+      
+    case "sendSummaryToEmail":
+      // In a real implementation, this would call an email service API
+      console.log('Sending business registration summary to email:', {
+        email: args.email,
+        clientName: args.clientName,
+        businessType: args.businessType,
+        summaryType: args.summaryType,
+        customTopics: args.customTopics
+      });
+      
+      // Simulate email sending
+      return {
+        success: true,
+        message: "Business registration summary sent successfully to email",
+        details: {
+          recipient: args.email,
+          clientName: args.clientName,
+          summaryType: args.summaryType,
+          sentAt: new Date().toISOString(),
+          estimatedDelivery: "1-2 minutes"
+        }
+      };
+      
     case "handleConversationClosure":
-      // This would typically save the conversation closure information
       // In a real implementation, this would call the actual handleConversationClosure tool
-      return { result: "Conversation closure handled successfully" };
+      // For now, return a success response
+      return { 
+        success: true, 
+        message: "Conversation closure handled successfully",
+        data: {
+          clientName: args.clientName,
+          businessType: args.businessType,
+          businessName: args.businessName,
+          deliveryPreference: args.deliveryPreference,
+          timestamp: new Date().toISOString()
+        }
+      };
     default:
-      return { result: "Information not available" };
+      return { result: "Tool not implemented" };
   }
 }
 
@@ -454,21 +487,39 @@ async function handleToolCalls(
 
 export const getNextResponseFromSupervisor = tool({
   name: 'getNextResponseFromSupervisor',
-  description: 'Determines the next response for Rawan AI customer service',
+  description: 'Determines the next response for Iraq Business Registration customer service',
   parameters: {
     type: 'object',
     properties: {
       relevantContextFromLastUserMessage: {
         type: 'string',
-        description: 'Key information from the user\'s most recent message',
+        description: 'Key information from the user\'s most recent message, especially regarding business registration inquiries',
       },
+      conversationStage: {
+        type: 'string',
+        enum: ['initial_contact', 'information_collection', 'specific_questions', 'confirmation', 'closure'],
+        description: 'Current stage of the conversation to provide appropriate guidance'
+      },
+      collectedInformation: {
+        type: 'object',
+        description: 'Business registration information collected so far from the user',
+        properties: {
+          hasPersonalInfo: { type: 'boolean' },
+          hasBusinessInfo: { type: 'boolean' },
+          hasContactInfo: { type: 'boolean' },
+          hasEmail: { type: 'boolean' },
+          specificTopicsRequested: { type: 'array', items: { type: 'string' } }
+        }
+      }
     },
     required: ['relevantContextFromLastUserMessage'],
     additionalProperties: false,
   },
   execute: async (input, details) => {
-    const { relevantContextFromLastUserMessage } = input as {
+    const { relevantContextFromLastUserMessage, conversationStage, collectedInformation } = input as {
       relevantContextFromLastUserMessage: string;
+      conversationStage?: string;
+      collectedInformation?: any;
     };
 
     const addBreadcrumb = (details?.context as any)?.addTranscriptBreadcrumb as
@@ -478,13 +529,26 @@ export const getNextResponseFromSupervisor = tool({
     const history: any[] = (details?.context as any)?.history ?? [];
     const filteredLogs = history.filter((log) => log.type === 'message');
 
+    // Build context-aware instructions
+    let contextAwareInstructions = supervisorAgentInstructions;
+    
+    if (conversationStage === 'information_collection') {
+      contextAwareInstructions += `\n\nCURRENT STAGE: INFORMATION COLLECTION\nFocus on gathering complete business registration details from the user. Ensure all required fields are collected naturally.`;
+    } else if (conversationStage === 'specific_questions') {
+      contextAwareInstructions += `\n\nCURRENT STAGE: SPECIFIC QUESTIONS\nProvide detailed, accurate information about business registration procedures using the knowledge base tools.`;
+    } else if (conversationStage === 'confirmation') {
+      contextAwareInstructions += `\n\nCURRENT STAGE: CONFIRMATION\nVerify all collected information with the user and prepare for conversation closure. Consider using sendSummaryToEmail if the user has provided an email address.`;
+    } else if (conversationStage === 'closure') {
+      contextAwareInstructions += `\n\nCURRENT STAGE: CLOSURE\nUse sendSummaryToEmail to send comprehensive business registration information and handleConversationClosure to finalize the conversation.`;
+    }
+
     const body: any = {
       model: 'gpt-4.1',
       input: [
         {
           type: 'message',
           role: 'system',
-          content: supervisorAgentInstructions,
+          content: contextAwareInstructions,
         },
         {
           type: 'message',
@@ -494,6 +558,9 @@ export const getNextResponseFromSupervisor = tool({
           
           Recent Context:
           ${relevantContextFromLastUserMessage}
+          
+          Conversation Stage: ${conversationStage || 'not specified'}
+          Collected Information: ${collectedInformation ? JSON.stringify(collectedInformation) : 'none'}
           `,
         },
       ],

@@ -1,0 +1,16 @@
+{
+  "clientName": "احمد محمد",
+  "nationalId": "12345678901234",
+  "phoneNumber": "+9647701234567",
+  "email": "ahmed@example.com",
+  "businessType": "Commercial",
+  "businessName": "محل أحمد للأجهزة",
+  "businessLocation": "بغداد",
+  "businessStructure": "Individual",
+  "initialCapital": 5000000,
+  "expectedEmployees": 3,
+  "businessAddress": "شارع الرشيد، بغداد",
+  "specificQuestions": "ما هي المستندات المطلوبة لتسجيل شركة تجارية؟",
+  "registrationTimeline": "خلال شهر",
+  "budgetForFees": 150000
+}

@@ -4,13 +4,18 @@ interface NavItemProps {
   href: string;
   children: React.ReactNode;
   className?: string;
+  download?: boolean; // Add download prop
 }
 
-const NavItem: React.FC<NavItemProps> = ({ href, children, className = '' }) => {
+const NavItem: React.FC<NavItemProps> = ({ href, children, className = '', download = false }) => {
+  // Check if the href is for downloading a file
+  const isDownloadLink = download || href.includes('githubusercontent') || href.endsWith('.pdf');
+  
   return (
     <a
       href={href}
-      className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium ${className}`}
+      className={`text-dark-800 hover:text-primary-500 transition-colors duration-200 font-medium font-montserrat ${className}`}
+      {...(isDownloadLink ? { download: true } : {})}
     >
       {children}
     </a>

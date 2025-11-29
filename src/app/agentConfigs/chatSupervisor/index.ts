@@ -26,7 +26,7 @@ try {
 // Define the saveClientInformation tool separately using the tool() function
 export const saveClientInformation = tool({
   name: 'saveClientInformation',
-  description: 'Save client information to Supabase database for business registration inquiries',
+  description: 'Save client information to Supabase database and JSON file for business registration inquiries',
   parameters: {
     type: 'object',
     properties: {
@@ -112,6 +112,41 @@ export const saveClientInformation = tool({
   },
   execute: async (params: any) => {
   console.log('Starting saveClientInformation with params:', params);
+  
+  // Extract context from params if available
+  const { context, ...clientParams } = params;
+  
+  // Update client info in the App component if updateClientInfo function is available
+  if (context && context.updateClientInfo && typeof context.updateClientInfo === 'function') {
+    try {
+      context.updateClientInfo(clientParams);
+    } catch (error) {
+      console.error('Error updating client info in App component:', error);
+    }
+  }
+
+  // Save to JSON file
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Create a timestamp for the filename
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `client-info-${timestamp}.json`;
+    const filepath = path.join(process.cwd(), 'data', filename);
+    
+    // Ensure the data directory exists
+    const dataDir = path.join(process.cwd(), 'data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    // Write the data to JSON file
+    fs.writeFileSync(filepath, JSON.stringify(clientParams, null, 2));
+    console.log('Successfully saved client information to JSON file:', filepath);
+  } catch (fileError) {
+    console.error('Error saving to JSON file:', fileError);
+  }
 
   if (!supabaseInitialized || !supabase) {
     const errorMsg = 'Supabase client not initialized. Check environment variables.';
@@ -182,10 +217,152 @@ export const saveClientInformation = tool({
 
 });
 
+// Define the sendProgressEmail tool for sending email summaries during the conversation
+export const sendProgressEmail = tool({
+  name: 'sendProgressEmail',
+  description: 'Send a progress email summary to the user during the conversation',
+  parameters: {
+    type: 'object',
+    properties: {
+      email: {
+        type: 'string',
+        description: 'Email address of the client for sending the summary'
+      },
+      clientName: {
+        type: 'string',
+        description: 'Full name of the client'
+      },
+      nationalId: {
+        type: 'string',
+        description: 'National ID number of the client'
+      },
+      phoneNumber: {
+        type: 'string',
+        description: 'Personal phone number of the client'
+      },
+      businessType: {
+        type: 'string',
+        description: 'Type of Business Activity (Commercial, Industrial, Agricultural, Service)'
+      },
+      businessName: {
+        type: 'string',
+        description: 'Preferred Business Name'
+      },
+      businessLocation: {
+        type: 'string',
+        description: 'Business Location (City/Province)'
+      },
+      businessStructure: {
+        type: 'string',
+        description: 'Preferred Business Structure (Individual, Partnership, Company)'
+      },
+      numberOfPartners: {
+        type: 'number',
+        description: 'Number of Partners (if applicable)'
+      },
+      initialCapital: {
+        type: 'number',
+        description: 'Initial Capital Estimate'
+      },
+      expectedEmployees: {
+        type: 'number',
+        description: 'Number of Expected Employees'
+      },
+      businessAddress: {
+        type: 'string',
+        description: 'Business Address (Current or Planned)'
+      },
+      businessPhone: {
+        type: 'string',
+        description: 'Business Phone Number'
+      },
+      businessEmail: {
+        type: 'string',
+        description: 'Business Email'
+      },
+      websiteOrSocialMedia: {
+        type: 'string',
+        description: 'Website or Social Media (if applicable)'
+      },
+      specificQuestions: {
+        type: 'string',
+        description: 'Specific Questions about Registration Process'
+      },
+      registrationTimeline: {
+        type: 'string',
+        description: 'Timeline for Registration'
+      },
+      budgetForFees: {
+        type: 'number',
+        description: 'Budget for Registration Fees'
+      },
+      specialRequirements: {
+        type: 'string',
+        description: 'Special Requirements (Trademark, Environmental Approval, etc.)'
+      }
+    },
+    required: ['email'],
+    additionalProperties: false
+  },
+  execute: async (params: any) => {
+    console.log('Sending progress email with params:', params);
+    
+    try {
+      // Call the email API to send the progress email
+      const response = await fetch('/api/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: params.email,
+          subject: "Progress Update - Business Registration Information",
+          html: `
+            <h2>Business Registration Progress Update</h2>
+            <p>Hello ${params.clientName || 'Valued Customer'},</p>
+            <p>Here's a summary of the information we've collected so far:</p>
+            
+            <h3>Personal Information</h3>
+            <ul>
+              <li>Name: ${params.clientName || 'Not provided'}</li>
+              <li>National ID: ${params.nationalId || 'Not provided'}</li>
+              <li>Phone: ${params.phoneNumber || 'Not provided'}</li>
+            </ul>
+            
+            <h3>Business Information</h3>
+            <ul>
+              <li>Business Type: ${params.businessType || 'Not provided'}</li>
+              <li>Business Name: ${params.businessName || 'Not provided'}</li>
+              <li>Business Location: ${params.businessLocation || 'Not provided'}</li>
+              <li>Business Structure: ${params.businessStructure || 'Not provided'}</li>
+            </ul>
+            
+            <p>We'll continue collecting information and send you a final summary at the end of the session.</p>
+            <p>Best regards,<br>The Business Registration Team</p>
+          `,
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('Progress email sent successfully:', result);
+        return { success: true, message: 'Progress email sent successfully' };
+      } else {
+        console.error('Failed to send progress email:', result.error);
+        return { success: false, error: `Failed to send progress email: ${result.error}` };
+      }
+    } catch (error) {
+      console.error('Error sending progress email:', error);
+      return { success: false, error: `Error sending progress email: ${error}` };
+    }
+  }
+});
+
 // Define the handleConversationClosure tool for confirming information and setting email preferences
 export const handleConversationClosure = tool({
   name: 'handleConversationClosure',
-  description: 'Handle conversation closure by confirming collected information with the user and setting email preferences',
+  description: 'Handle conversation closure by confirming collected information with the user and setting email preferences. Also saves data to JSON file.',
   parameters: {
     type: 'object',
     properties: {
@@ -282,6 +459,29 @@ export const handleConversationClosure = tool({
   execute: async (params: any) => {
     console.log('Handling conversation closure with params:', params);
     
+    // Save to JSON file
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Create a timestamp for the filename
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `conversation-closure-${timestamp}.json`;
+      const filepath = path.join(process.cwd(), 'data', filename);
+      
+      // Ensure the data directory exists
+      const dataDir = path.join(process.cwd(), 'data');
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      
+      // Write the data to JSON file
+      fs.writeFileSync(filepath, JSON.stringify(params, null, 2));
+      console.log('Successfully saved conversation closure data to JSON file:', filepath);
+    } catch (fileError) {
+      console.error('Error saving conversation closure to JSON file:', fileError);
+    }
+    
     // If the user has confirmed and chosen a delivery preference, send the email
     if (params.confirmationStatus === 'confirmed' && params.deliveryPreference && params.email) {
       try {
@@ -326,7 +526,7 @@ export const chatAgent = new RealtimeAgent({
 
   Your name is ادم (Adam).
 
-  You only speak and respond in Iraqi Arabic. Never use English or Modern Standard Arabic (Fus'ha).
+  You only speak and respond in Iraqi Arabic. maybe use English or Modern Standard Arabic (Fus'ha).
 
   You are very new and can only handle basic tasks, and will rely heavily on the Supervisor Agent via the getNextResponseFromSupervisor tool.
 
@@ -345,37 +545,47 @@ export const chatAgent = new RealtimeAgent({
 
   ## Special Instructions for Business Registration Inquiries
 
-  When a customer shows interest in registering a business in Iraq, you should collect the following information before consulting the supervisor:
+  When a customer shows interest in registering a business in Iraq, you should collect the following information naturally in conversation:
 
   1️⃣ General Business Information
   - Type of Business Activity (Commercial, Industrial, Agricultural, Service)
   - Business Name (if already chosen)
   - Business Location (City/Province)
-  - Personal Information (Name, National ID, Contact Information)
 
-  2️⃣ Business Structure Information
+  2️⃣ Personal Information
+  - Full Name
+  - National ID
+  - Phone Number
+  ]
+
+  3️⃣ Business Structure Information
   - Preferred Business Structure (Individual, Partnership, Company)
   - Number of Partners (if applicable)
   - Initial Capital Estimate
   - Number of Expected Employees
 
-  3️⃣ Operational Information
+  4️⃣ Operational Information
   - Business Address (Current or Planned)
   - Business Phone Number
   - Business Email
   - Website or Social Media (if applicable)
 
-  4️⃣ Specific Requirements
+  5️⃣ Specific Requirements
   - Specific Questions about Registration Process
   - Timeline for Registration
   - Budget for Registration Fees
   - Special Requirements (Trademark, Environmental Approval, etc.)
 
-  Collect this information naturally in conversation, then save it using the saveClientInformation tool before consulting the supervisor.
-
+  6️⃣ Contact Information (Email)
+  - Email Address (Ask for this as the last piece of information before saving)
+  
+  Collect this information naturally in conversation. Ask for the email address as the last piece of information before saving, then save it using the saveClientInformation tool before consulting the supervisor.
+  
+  During the conversation, when significant information has been collected (e.g., after collecting the client's name, business type, and business name), you should use the sendProgressEmail tool to send a progress update to the user's email address.
+  
   ## Conversation Closure Process
 
-  Once you have collected all the necessary information from the user, you should:
+  Once you have collected all the necessary information from the user, including their email as the final piece, you should:
 
   1. Summarize all collected information in a friendly and clear manner in Iraqi Arabic, for example:
      "زين، حتى أتأكد وياك، انت اسمك {clientName}، رقمك {phoneNumber}، نوع النشاط {businessType}، واسم المشروع {businessName}، صح لو أكو شي تحتاج أعدله؟"
@@ -409,7 +619,7 @@ export const chatAgent = new RealtimeAgent({
 
   # Tools
 
-  You can call getNextResponseFromSupervisor, saveClientInformation, and handleConversationClosure.
+  You can call getNextResponseFromSupervisor, saveClientInformation, sendProgressEmail, and handleConversationClosure.
 
   # Allowed Direct Actions (without Supervisor)
 
@@ -437,6 +647,7 @@ export const chatAgent = new RealtimeAgent({
   tools: [
     getNextResponseFromSupervisor,
     saveClientInformation,
+    sendProgressEmail,
     handleConversationClosure
   ],
 });

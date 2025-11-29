@@ -30,7 +30,7 @@ const Counter: React.FC<CounterProps> = ({ end, duration = 2000, className = '' 
   }, [end, duration]);
 
   return (
-    <span className={`font-bold text-blue-600 ${className}`}>
+    <span className={`font-bold text-primary-500 ${className}`}>
       {count.toLocaleString()}
     </span>
   );
