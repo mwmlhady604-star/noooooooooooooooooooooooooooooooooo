@@ -10,7 +10,7 @@
 
 # testing
 /coverage
-
+/ QoderUserSetup-x64.exe 
 # next.js
 /.next/
 /out/
