@@ -5,6 +5,7 @@ services:
     plan: starter
     buildCommand: npm install && npm run build
     startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,4 +14,10 @@ services:
       - key: PORT
         value: 3000
       - key: OPENAI_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: RESEND_API_KEY
         sync: false

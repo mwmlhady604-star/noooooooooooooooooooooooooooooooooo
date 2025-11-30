@@ -31,10 +31,12 @@ There are two main patterns demonstrated:
 
 This application is ready for deployment to Render with the included Dockerfile and render.yaml configuration.
 
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+
 1. Fork this repository to your GitHub account
 2. Create a new Web Service on Render
 3. Connect your forked repository
-4. Add your `OPENAI_API_KEY` as an environment variable in the Render dashboard
+4. Add your environment variables as specified in the deployment guide
 5. Deploy!
 
 The application will automatically build using the Dockerfile and start on port 3000.
@@ -248,9 +250,14 @@ Feel free to open an issue or pull request and we'll do our best to review it. T
 # Core Contributors
 - Noah MacCallum - [noahmacca](https://x.com/noahmacca)
 - Ilan Bigio - [ibigio](https://github.com/ibigio)
-- Brian Fioca - [bfioca](https://github.com/bfioca)#   n o n  
- #   n o n  
- #   n o n  
- #   n o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o  
- #   n o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o  
+- Brian Fioca - [bfioca](https://github.com/bfioca)#   n o n 
+ 
+ #   n o n 
+ 
+ #   n o n 
+ 
+ #   n o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+ 
+ #   n o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+ 
  
