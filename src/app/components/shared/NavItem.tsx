@@ -10,7 +10,7 @@ interface NavItemProps {
 const NavItem: React.FC<NavItemProps> = ({ href, children, className = '', download = false }) => {
   // Check if the href is for downloading a file
   const isDownloadLink = download || href.includes('githubusercontent') || href.endsWith('.pdf');
-  
+
   return (
     <a
       href={href}

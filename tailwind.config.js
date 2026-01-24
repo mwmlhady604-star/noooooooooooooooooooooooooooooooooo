@@ -6,46 +6,41 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#fef7f0',
-          100: '#fde9d9',
-          200: '#fbd5b5',
-          300: '#f8b985',
-          400: '#f39754',
-          500: '#E26600',
-          600: '#d05502',
-          700: '#ae4302',
-          800: '#8c3503',
-          900: '#712b04',
+        orange: {
+          50: '#fefbf8',
+          100: '#f6d1b3',
+          DEFAULT: '#e26702', // main
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#d95f00',
+          800: '#e26600',
         },
-        secondary: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-        },
-        dark: {
+        zinc: {
           50: '#fafafa',
           100: '#f4f4f5',
           200: '#e4e4e7',
           300: '#d4d4d8',
           400: '#a1a1aa',
-          500: '#71717a',
+          500: '#71717a', // added for completeness if needed, though not in strict list but common
           600: '#52525b',
           700: '#3f3f46',
-          800: '#202020',
-          900: '#18181b',
+          800: '#27272a',
+          900: '#18181b', // Used in footer
+        },
+        red: {
+          500: '#ef4444',
         }
       },
       fontFamily: {
-        'montserrat': ['Montserrat', 'sans-serif'],
+        'sans': ['Inter', 'sans-serif'], // Assuming Inter as a modern default choice
       },
+      fontSize: {
+        'body': ['17px', { lineHeight: '1.5' }],
+        'h4': ['20px', { lineHeight: '1.25', fontWeight: '600' }],
+        'h3': ['24px', { lineHeight: '1.25', fontWeight: '600' }],
+        'h2': ['32px', { lineHeight: '1.25', fontWeight: '700' }],
+        'h1': ['40px', { lineHeight: '1.25', fontWeight: '700' }],
+      }
     },
   },
   plugins: [],

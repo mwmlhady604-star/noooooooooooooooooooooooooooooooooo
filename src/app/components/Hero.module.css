@@ -1,0 +1,146 @@
+/* Bubble Grow Animation */
+.bubbleGrow {
+  animation: bubbleGrow 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+@keyframes bubbleGrow {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Ring Pulse Animation */
+.ringPulse {
+  animation: ringPulse 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes ringPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(251, 146, 68, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 20px rgba(251, 146, 68, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(251, 146, 68, 0);
+  }
+}
+
+/* Shimmer Effect */
+.shimmer {
+  background: linear-gradient(to left, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Hover Glow Effect */
+.hoverGlow {
+  transition: all 0.3s ease-in-out;
+}
+
+.hoverGlow:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 4px rgba(251, 146, 68, 0.3);
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* Pulse Fade Animation */
+.pulseFade {
+  animation: pulseFade 2s infinite;
+}
+
+@keyframes pulseFade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Container for the animated elements */
+.animationContainer {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animated bubbles */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 146, 68, 0.3) 0%, rgba(251, 146, 68, 0.1) 70%);
+  animation: float 8s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+.bubble1 {
+  width: 80px;
+  height: 80px;
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.bubble2 {
+  width: 60px;
+  height: 60px;
+  bottom: 15%;
+  right: 25%;
+  animation-delay: 1s;
+}
+
+.bubble3 {
+  width: 40px;
+  height: 40px;
+  top: 40%;
+  right: 10%;
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(0) translateX(20px);
+  }
+  75% {
+    transform: translateY(10px) translateX(-10px);
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .animationContainer {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .bubble {
+    opacity: 0.6;
+  }
+}

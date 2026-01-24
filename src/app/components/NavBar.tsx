@@ -25,16 +25,16 @@ type MegaMenuContent = {
 const NavBar: React.FC<NavBarProps> = ({ onToggleConnection }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  
+
   const navItems = [
-   
-    { label: 'Download Manual PDF', href: '/brm.pdf', download: true },
-    { label: 'About Us', href: '#about' },
+
+    { label: 'تحميل الدليل (PDF)', href: '/brm.pdf', download: true },
+    { label: 'من نحن', href: '#about' },
   ];
 
   // Mega menu content data
   const megaMenuContent: MegaMenuContent = {
-    
+
   };
 
   const handleToggleConnection = () => {
@@ -51,7 +51,7 @@ const NavBar: React.FC<NavBarProps> = ({ onToggleConnection }) => {
   };
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50 font-montserrat">
+    <nav className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 font-sans border-b border-zinc-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -62,19 +62,19 @@ const NavBar: React.FC<NavBarProps> = ({ onToggleConnection }) => {
           {/* Navigation Items */}
           <div className="hidden md:flex space-x-10">
             {navItems.map((item) => (
-              <div 
-                key={item.label} 
+              <div
+                key={item.label}
                 className="relative"
                 {...(megaMenuContent[item.label] ? {
                   onMouseEnter: () => handleMenuEnter(item.label),
                   onMouseLeave: handleMenuLeave
                 } : {})}
               >
-                <NavItem href={item.href} className="flex items-center text-base font-medium text-primary-500 hover:text-dark-800" download={item.download}>
+                <NavItem href={item.href} className="flex items-center text-[17px] font-medium text-zinc-600 hover:text-orange transition-colors" download={item.download}>
                   {item.label}
                   {megaMenuContent[item.label] && <FiChevronDown className="ml-2 h-4 w-4" />}
                 </NavItem>
-                
+
                 {/* Mega Menu Dropdown */}
                 {activeMenu === item.label && megaMenuContent[item.label] && (
                   <div className="absolute left-0 w-screen max-w-7xl bg-white shadow-xl rounded-b-lg border-t border-primary-100 mt-0 py-8 px-10">
@@ -87,8 +87,8 @@ const NavBar: React.FC<NavBarProps> = ({ onToggleConnection }) => {
                           <ul className="space-y-3">
                             {section.items.map((link, linkIndex) => (
                               <li key={linkIndex}>
-                                <a 
-                                  href={link.href} 
+                                <a
+                                  href={link.href}
                                   className="flex items-start p-3 -m-3 rounded-lg hover:bg-primary-50 transition duration-150 ease-in-out"
                                   onClick={() => setActiveMenu(null)}
                                 >
@@ -106,17 +106,17 @@ const NavBar: React.FC<NavBarProps> = ({ onToggleConnection }) => {
                         </div>
                       ))}
                     </div>
-                    
+
                     {/* Optional: CTA section at the bottom of the mega menu */}
                     {item.label === "Services" && (
                       <div className="mt-10 pt-8 border-t border-primary-200">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="text-lg font-medium text-dark-800">Need help with your registration?</h3>
-                            <p className="text-gray-600 mt-1">Talk to our registration experts for personalized guidance</p>
+                            <h3 className="text-lg font-medium text-dark-800">هل تحتاج مساعدة في تسجيلك؟</h3>
+                            <p className="text-gray-600 mt-1">تحدث إلى خبراء التسجيل لدينا للمساعدة الشخصية</p>
                           </div>
                           <Button variant="primary" size="sm">
-                            Get Expert Help
+                            احصل على مساعدة الخبراء
                           </Button>
                         </div>
                       </div>
@@ -128,21 +128,20 @@ const NavBar: React.FC<NavBarProps> = ({ onToggleConnection }) => {
           </div>
 
           {/* Right side buttons */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 hidden ">
             {/* Toggle Connection Button */}
             <button
               onClick={handleToggleConnection}
-              className={`p-2.5 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                isConnected 
-                  ? 'bg-secondary-100 text-secondary-600 hover:bg-secondary-200 focus:ring-secondary-500' 
-                  : 'bg-primary-100 text-primary-500 hover:bg-primary-200 focus:ring-primary-500'
-              }`}
+              className={`p-2.5 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isConnected
+                ? 'bg-red-100 text-red-600 hover:bg-red-200 focus:ring-red-500'
+                : 'bg-orange-50 text-orange hover:bg-orange-100 focus:ring-orange-400'
+                }`}
               aria-label={isConnected ? "End Connection" : "Start Connection"}
             >
               {isConnected ? <FiPhoneOff size={20} /> : <FiPhone size={20} />}
             </button>
 
-           
+
           </div>
         </div>
       </div>

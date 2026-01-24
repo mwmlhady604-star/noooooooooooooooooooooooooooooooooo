@@ -90,7 +90,7 @@ function Transcript({
               <span>Download Audio</span>
             </button>
           </div>
-          
+
         </div>
 
         {/* Transcript Content */}
@@ -113,87 +113,83 @@ function Transcript({
                 guardrailResult,
               } = item;
 
-            if (isHidden) {
-              return null;
-            }
+              if (isHidden) {
+                return null;
+              }
 
-            if (type === "MESSAGE") {
-              const isUser = role === "user";
-              
-              // Show typing indicator for assistant messages that are in progress
-              if (!isUser && status === "IN_PROGRESS" && (!title || title.trim() === "")) {
-                return (
-                  <div key={itemId} className="flex justify-start items-start">
-                    <div className="bg-primary-50 text-dark-800 max-w-lg p-3 rounded-t-xl rounded-b-xl">
-                      <div className="flex items-center space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce-custom"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce-custom" style={{ animationDelay: '0.2s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce-custom" style={{ animationDelay: '0.4s' }}></div>
-                        <span className="ml-2 text-sm">Thinking...</span>
+              if (type === "MESSAGE") {
+                const isUser = role === "user";
+
+                // Show typing indicator for assistant messages that are in progress
+                if (!isUser && status === "IN_PROGRESS" && (!title || title.trim() === "")) {
+                  return (
+                    <div key={itemId} className="flex justify-start items-start">
+                      <div className="bg-primary-50 text-dark-800 max-w-lg p-3 rounded-t-xl rounded-b-xl">
+                        <div className="flex items-center space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce-custom"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce-custom" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce-custom" style={{ animationDelay: '0.4s' }}></div>
+                          <span className="ml-2 text-sm">Thinking...</span>
+                        </div>
                       </div>
+                    </div>
+                  );
+                }
+
+                const containerClasses = `flex justify-end flex-col ${isUser ? "items-end" : "items-start"
+                  }`;
+                const bubbleBase = `max-w-lg p-3 ${isUser ? "bg-dark-800 text-white" : "bg-primary-50 text-dark-800"
+                  }`;
+                const isBracketedMessage =
+                  title.startsWith("[") && title.endsWith("]");
+                const messageStyle = isBracketedMessage
+                  ? 'italic text-gray-400'
+                  : '';
+                const displayTitle = isBracketedMessage
+                  ? title.slice(1, -1)
+                  : title;
+
+                return (
+                  <div key={itemId} className={containerClasses}>
+                    <div className="max-w-lg">
+                      <div
+                        className={`${bubbleBase} rounded-t-xl ${guardrailResult ? "" : "rounded-b-xl"
+                          }`}
+                      >
+                        <div
+                          className={`text-xs ${isUser ? "text-gray-400" : "text-gray-500"
+                            } font-mono`}
+                        >
+                          {timestamp}
+                        </div>
+                        <div className={`whitespace-pre-wrap text-zinc-700 ${messageStyle}`}>
+                          <ReactMarkdown>{displayTitle}</ReactMarkdown>
+                        </div>
+                      </div>
+                      {guardrailResult && (
+                        <div className="bg-gray-200 px-3 py-2 rounded-b-xl">
+                          <GuardrailChip guardrailResult={guardrailResult} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
-              }
-              
-              const containerClasses = `flex justify-end flex-col ${
-                isUser ? "items-end" : "items-start"
-              }`;
-              const bubbleBase = `max-w-lg p-3 ${
-                isUser ? "bg-dark-800 text-white" : "bg-primary-50 text-dark-800"
-              }`;
-              const isBracketedMessage =
-                title.startsWith("[") && title.endsWith("]");
-              const messageStyle = isBracketedMessage
-                ? 'italic text-gray-400'
-                : '';
-              const displayTitle = isBracketedMessage
-                ? title.slice(1, -1)
-                : title;
-
-              return (
-                <div key={itemId} className={containerClasses}>
-                  <div className="max-w-lg">
-                    <div
-                      className={`${bubbleBase} rounded-t-xl ${
-                        guardrailResult ? "" : "rounded-b-xl"
-                      }`}
-                    >
-                      <div
-                        className={`text-xs ${
-                          isUser ? "text-gray-400" : "text-gray-500"
-                        } font-mono`}
-                      >
-                        {timestamp}
-                      </div>
-                      <div className={`whitespace-pre-wrap ${messageStyle}`}>
-                        <ReactMarkdown>{displayTitle}</ReactMarkdown>
-                      </div>
-                    </div>
-                    {guardrailResult && (
-                      <div className="bg-gray-200 px-3 py-2 rounded-b-xl">
-                        <GuardrailChip guardrailResult={guardrailResult} />
-                      </div>
-                    )}
+              } else if (type === "BREADCRUMB") {
+                // Hide breadcrumb items to show only the typing indicator
+                return null;
+              } else {
+                // Fallback if type is neither MESSAGE nor BREADCRUMB
+                return (
+                  <div
+                    key={itemId}
+                    className="flex justify-center text-gray-500 text-sm italic font-mono"
+                  >
+                    Unknown item type: {type}{" "}
+                    <span className="ml-2 text-xs">{timestamp}</span>
                   </div>
-                </div>
-              );
-            } else if (type === "BREADCRUMB") {
-              // Hide breadcrumb items to show only the typing indicator
-              return null;
-            } else {
-              // Fallback if type is neither MESSAGE nor BREADCRUMB
-              return (
-                <div
-                  key={itemId}
-                  className="flex justify-center text-gray-500 text-sm italic font-mono"
-                >
-                  Unknown item type: {type}{" "}
-                  <span className="ml-2 text-xs">{timestamp}</span>
-                </div>
-              );
-            }
-          })}
+                );
+              }
+            })}
         </div>
       </div>
 

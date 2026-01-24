@@ -34,8 +34,8 @@ function BottomToolbar({
   onCodecChange,
 }: BottomToolbarProps) {
   type BottomToolbarProps = {
-  onToggleConnection: () => void;
-};
+    onToggleConnection: () => void;
+  };
   const isConnected = sessionStatus === "CONNECTED";
   const isConnecting = sessionStatus === "CONNECTING";
 
@@ -45,36 +45,36 @@ function BottomToolbar({
   };
 
   function getConnectionButtonLabel(isConnected: boolean, isConnecting: boolean) {
-  if (isConnected) return <PhoneOff className="w-5 h-5 text-red-500" />;
-  if (isConnecting) return <Loader2 className="w-5 h-5 animate-spin text-yellow-500" />;
-  return <Phone className="w-5 h-5 text-green-500" />;
-}
-
- function getConnectionButtonClasses() {
-  const baseClasses = 'text-white text-base p-2 w-36 rounded-md h-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 font-montserrat';
-  const cursorClass = isConnecting ? 'cursor-not-allowed' : 'cursor-pointer';
-
-  if (isConnected) {
-    // Connected -> label "Disconnect" -> red
-    return `${baseClasses} bg-red-600 hover:bg-red-700 focus:ring-red-500 ${cursorClass}`;
+    if (isConnected) return <PhoneOff className="w-5 h-5 text-white" />;
+    if (isConnecting) return <Loader2 className="w-5 h-5 animate-spin text-white" />;
+    return <Phone className="w-5 h-5 text-white" />;
   }
-  // Disconnected or connecting -> label is either "Connect" or "Connecting" -> primary color
-  return `${baseClasses} bg-primary-500 hover:bg-primary-600 focus:ring-primary-500 ${cursorClass}`;
-}
-const BottomToolbar: React.FC<BottomToolbarProps> = ({ onToggleConnection }) => {
+
+  function getConnectionButtonClasses() {
+    const baseClasses = 'text-white text-[17px] font-medium px-6 py-3 min-w-[144px] rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-zinc-900 font-sans flex items-center justify-center gap-2';
+    const cursorClass = isConnecting ? 'cursor-not-allowed opacity-80' : 'cursor-pointer';
+
+    if (isConnected) {
+      // Connected -> label "Disconnect" -> red-500
+      return `${baseClasses} bg-red-500 hover:bg-red-600 focus:ring-red-500 ${cursorClass}`;
+    }
+    // Disconnected or connecting -> label is either "Connect" or "Connecting" -> orange
+    return `${baseClasses} bg-orange hover:bg-orange-400 focus:ring-orange-400 ${cursorClass}`;
+  }
+  const BottomToolbar: React.FC<BottomToolbarProps> = ({ onToggleConnection }) => {
+    return (
+      <div className="fixed bottom-0 w-full p-4 bg-gray-700 text-white flex justify-center  hidden  ">
+        <button
+          onClick={onToggleConnection}
+          className="bg-green-600 px-4 py-2 rounded"
+        >
+          تبديل الاتصال
+        </button>
+      </div>
+    );
+  };
   return (
-    <div className="fixed bottom-0 w-full p-4 bg-gray-700 text-white flex justify-center  hidden  ">
-      <button
-        onClick={onToggleConnection}
-        className="bg-green-600 px-4 py-2 rounded"
-      >
-        Toggle Connection
-      </button>
-    </div>
-  );
-};
-  return (
-    <div className="p-4 flex flex-row items-center justify-center gap-x-8   hidden  ">
+    <div className="p-4 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-800 flex flex-row items-center justify-center gap-x-8 text-zinc-50 shadow-2xl   hidden  ">
       <button
         onClick={onToggleConnection}
         className={getConnectionButtonClasses()}
@@ -90,13 +90,13 @@ const BottomToolbar: React.FC<BottomToolbarProps> = ({ onToggleConnection }) => 
           checked={isPTTActive}
           onChange={(e) => setIsPTTActive(e.target.checked)}
           disabled={!isConnected}
-          className="w-4 h-4"
+          className="w-5 h-5 rounded-md border-zinc-500 text-orange focus:ring-orange-500 bg-zinc-800 cursor-pointer accent-orange"
         />
         <label
           htmlFor="push-to-talk"
           className="flex items-center cursor-pointer   hidden"
         >
-          Push to talk
+          اضغط للتحدث
         </label>
         <button
           onMouseDown={handleTalkButtonDown}
@@ -105,12 +105,12 @@ const BottomToolbar: React.FC<BottomToolbarProps> = ({ onToggleConnection }) => 
           onTouchEnd={handleTalkButtonUp}
           disabled={!isPTTActive}
           className={
-            (isPTTUserSpeaking ? "bg-primary-300" : "bg-primary-200") +
-            " py-1 px-4 cursor-pointer rounded-md font-montserrat" +
-            (!isPTTActive ? " bg-primary-100 text-primary-300" : " text-dark-800")
+            (isPTTUserSpeaking ? "bg-orange-400 scale-105 shadow-orange/50" : "bg-orange") +
+            " py-2 px-6 cursor-pointer rounded-full font-sans transition-all duration-300 shadow-md flex items-center justify-center " +
+            (!isPTTActive ? " opacity-50 cursor-not-allowed bg-zinc-700 text-zinc-400 shadow-none scale-100" : " text-white hover:shadow-lg hover:scale-105")
           }
         >
-          Talk
+          تحدث
         </button>
       </div>
 
@@ -121,31 +121,31 @@ const BottomToolbar: React.FC<BottomToolbarProps> = ({ onToggleConnection }) => 
           checked={isAudioPlaybackEnabled}
           onChange={(e) => setIsAudioPlaybackEnabled(e.target.checked)}
           disabled={!isConnected}
-          className="w-4 h-4"
+          className="w-5 h-5 rounded-md border-zinc-500 text-orange focus:ring-orange-500 bg-zinc-800 cursor-pointer accent-orange"
         />
         <label
           htmlFor="audio-playback"
           className="flex items-center cursor-pointer hidden   "
         >
-          Audio playback
+          تشغيل الصوت
         </label>
       </div>
-<div  className="hidden   ">  
-      <div className="flex flex-row items-center gap-2  hidden">
-        <input
-          id="logs"
-          type="checkbox"
-          checked={isEventsPaneExpanded}
-          onChange={(e) => setIsEventsPaneExpanded(e.target.checked)}
-          className="w-4 h-4"
-        />
-        <label htmlFor="logs" className="flex items-center cursor-pointer hidden    ">
-          Logs
-        </label>
+      <div className="hidden   ">
+        <div className="flex flex-row items-center gap-2  hidden">
+          <input
+            id="logs"
+            type="checkbox"
+            checked={isEventsPaneExpanded}
+            onChange={(e) => setIsEventsPaneExpanded(e.target.checked)}
+            className="w-4 h-4"
+          />
+          <label htmlFor="logs" className="flex items-center cursor-pointer hidden    ">
+            السجلات
+          </label>
+        </div>
       </div>
- </div>
       <div className="flex flex-row items-center gap-2">
-        <div>Codec:</div>
+        <div>الترميز:</div>
         {/*
           Codec selector – Lets you force the WebRTC track to use 8 kHz 
           PCMU/PCMA so you can preview how the agent will sound 
@@ -158,7 +158,7 @@ const BottomToolbar: React.FC<BottomToolbarProps> = ({ onToggleConnection }) => 
           id="codec-select"
           value={codec}
           onChange={handleCodecChange}
-          className="border border-primary-300 rounded-md px-2 py-1 focus:outline-none cursor-pointer text-dark-800 font-montserrat"
+          className="bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange focus:border-orange cursor-pointer text-zinc-100 font-sans text-[17px] shadow-sm transition-all hover:border-zinc-500"
         >
           <option value="opus">Opus (48 kHz)</option>
           <option value="pcmu">PCMU (8 kHz)</option>

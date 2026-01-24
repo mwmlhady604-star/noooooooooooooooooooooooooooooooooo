@@ -18,7 +18,7 @@ const Button: React.FC<ButtonProps> = ({
   type = 'button'
 }) => {
   const baseClasses = 'font-montserrat font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
-  
+
   const variants = {
     primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500',
     secondary: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',

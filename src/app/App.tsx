@@ -43,13 +43,23 @@ import useAudioDownload from "./hooks/useAudioDownload";
 import { useHandleSessionHistory } from "./hooks/useHandleSessionHistory";
 
 
-function CallTimer() {
+function CallTimer({ onDisconnect }: { onDisconnect?: () => void }) {
   const [seconds, setSeconds] = useState(0);
+  const MAX_TIME_SECONDS = 10 * 60; // 10 minutes
 
   useEffect(() => {
-    const timer = setInterval(() => setSeconds((s) => s + 1), 1000);
+    const timer = setInterval(() => {
+      setSeconds((s) => {
+        const newSeconds = s + 1;
+        // Auto disconnect when reaching 10 minutes
+        if (newSeconds >= MAX_TIME_SECONDS && onDisconnect) {
+          onDisconnect();
+        }
+        return newSeconds;
+      });
+    }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [onDisconnect]);
 
   const formatTime = (s: number) => {
     const mins = Math.floor(s / 60);
@@ -59,11 +69,24 @@ function CallTimer() {
       .padStart(2, "0")}`;
   };
 
-  return <div className="text-2xl font-mono">{formatTime(seconds)}</div>;
+  // Show warning when approaching disconnect time (last 60 seconds)
+  const isWarningTime = seconds > MAX_TIME_SECONDS - 60;
+  const remainingSeconds = MAX_TIME_SECONDS - seconds;
+
+  return (
+    <div className={`text-2xl font-mono ${isWarningTime ? 'text-red-500 animate-pulse' : 'text-zinc-50'}`}>
+      {formatTime(seconds)}
+      {isWarningTime && (
+        <div className="text-xs mt-1">
+          سيتم قطع الاتصال خلال {remainingSeconds} ثانية
+        </div>
+      )}
+    </div>
+  );
 }
 
 function App() {
-  
+
   const searchParams = useSearchParams()!;
 
   // ---------------------------------------------------------------------
@@ -178,7 +201,7 @@ function App() {
     setSelectedAgentConfigSet(agents);
   }, [searchParams]);
 
-  
+
 
   useEffect(() => {
     if (
@@ -263,7 +286,7 @@ function App() {
             addTranscriptBreadcrumb,
           },
         });
-      
+
         // Hide ringing interface when connection is established
         setShowRingingInterface(false);
       } catch (err) {
@@ -310,12 +333,12 @@ function App() {
     const turnDetection = isPTTActive
       ? null
       : {
-          type: 'server_vad',
-          threshold: 0.9,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 500,
-          create_response: true,
-        };
+        type: 'server_vad',
+        threshold: 0.9,
+        prefix_padding_ms: 300,
+        silence_duration_ms: 500,
+        create_response: true,
+      };
 
     sendEvent({
       type: 'session.update',
@@ -493,12 +516,12 @@ function App() {
   useEffect(() => {
     if (sessionStatus === "CONNECTED") {
       setShowEmailReminder(true);
-      
+
       // Auto-hide the popup after 10 seconds
       const timer = setTimeout(() => {
         setShowEmailReminder(false);
       }, 10000);
-      
+
       return () => clearTimeout(timer);
     } else {
       setShowEmailReminder(false);
@@ -507,161 +530,164 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-    <NavBar onToggleConnection={onToggleConnection} />
+      <NavBar onToggleConnection={onToggleConnection} />
 
-    {/* WhatsApp-like Calling Interface */}
-    {showRingingInterface && (
-      <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999]">
-        <div className="text-center text-white">
-          <div className="relative mb-8">
-            <div className="w-24 h-24 mx-auto bg-green-500 rounded-full flex items-center justify-center animate-pulse">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-              </svg>
-            </div>
-          </div>
-          <h2 className="text-2xl font-semibold mb-2">Connecting...</h2>
-          <p className="text-gray-300 mb-8">Please wait while we establish the connection</p>
-          <button
-            onClick={() => {
-              setShowRingingInterface(false);
-              setSessionStatus("DISCONNECTED");
-              disconnectFromRealtime();
-            }}
-            className="bg-red-500 hover:bg-red-600 text-white rounded-full p-4 mx-auto"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    )}
-
-    {/* Call Timer Display - shown when connected */}
-    {sessionStatus === "CONNECTED" && (
-      <div className="fixed top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-2 rounded-lg z-[9998]">
-        <CallTimer />
-      </div>
-    )}
-
-    {/* Floating Action Button (FAB) for Connection */}
-    <button
-      onClick={onToggleConnection}
-      className={`fixed bottom-6 right-6 z-[9999] p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none ${
-        sessionStatus === "CONNECTED"
-          ? "bg-red-500 hover:bg-red-600"
-          : sessionStatus === "CONNECTING"
-          ? "bg-yellow-500 hover:bg-yellow-600"
-          : "bg-green-500 hover:bg-green-600"
-      }`}
-      aria-label={
-        sessionStatus === "CONNECTED"
-          ? "End Connection"
-          : sessionStatus === "CONNECTING"
-          ? "Connecting..."
-          : "Start Connection"
-      }
-    >
-      {sessionStatus === "CONNECTED" ? (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      ) : sessionStatus === "CONNECTING" ? (
-        <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-        </svg>
-      )}
-    </button>
-
-    {/* Floating Transcript Panel */}
-    {sessionStatus === "CONNECTED" && (
-      <div className="fixed bottom-24 right-6 z-[9998] w-96 h-96 bg-white rounded-xl shadow-2xl border border-gray-200">
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold">Transcript</h3>
-            <button 
-              onClick={() => setSessionStatus("DISCONNECTED")}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <Transcript 
-              userText={userText}
-              setUserText={setUserText}
-              onSendMessage={handleSendTextMessage}
-              canSend={sessionStatus === "CONNECTED"}
-              downloadRecording={downloadRecording}
-            />
-          </div>
-        </div>
-      </div>
-    )}
-
-    {/* Email Reminder Popup */}
-    {showEmailReminder && (
-      <div className="fixed top-4 right-4 z-[10000] w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in-down">
-        <div className="p-4">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="h-6 w-6 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+      {/* WhatsApp-like Calling Interface */}
+      {showRingingInterface && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999]">
+          <div className="text-center text-white">
+            <div className="relative mb-8">
+              <div className="w-24 h-24 mx-auto bg-orange rounded-full flex items-center justify-center animate-pulse shadow-orange/50 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">Important</h3>
-              </div>
             </div>
-            <button 
-              onClick={() => setShowEmailReminder(false)}
-              className="text-gray-400 hover:text-gray-500"
+            <h2 className="text-2xl font-semibold mb-2">جارٍ الاتصال...</h2>
+            <p className="text-gray-300 mb-8">يرجى الانتظار بينما نقوم بإنشاء الاتصال</p>
+            <button
+              onClick={() => {
+                setShowRingingInterface(false);
+                setSessionStatus("DISCONNECTED");
+                disconnectFromRealtime();
+              }}
+              className="bg-red-500 hover:bg-red-600 text-white rounded-full p-4 mx-auto"
             >
-              <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </button>
           </div>
-          <div className="mt-2">
-            <p className="text-sm text-gray-700">
-              <span className="font-medium">Before ending the call,</span> please make sure you have received the email. If you don't see it in your inbox, kindly ask the AI agent to resend it.
-            </p>
-          </div>
         </div>
-        <div className="bg-gray-50 px-4 py-3 rounded-b-lg">
-          <div className="flex justify-end">
-            <button
-              onClick={() => setShowEmailReminder(false)}
-              className="text-sm font-medium text-yellow-700 hover:text-yellow-800"
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
+      )}
 
-<main>
-        <Hero 
+      {/* Call Timer Display - shown when connected */}
+      {sessionStatus === "CONNECTED" && (
+        <div className="fixed top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-2 rounded-lg z-[9998]">
+          <CallTimer onDisconnect={() => {
+            disconnectFromRealtime();
+            setSessionStatus("DISCONNECTED");
+            setShowRingingInterface(false);
+          }} />
+        </div>
+      )}
+
+      {/* Floating Action Button (FAB) for Connection */}
+      <button
+        onClick={onToggleConnection}
+        className={`fixed bottom-6 right-6 z-[9999] p-4 rounded-full shadow-xl transition-all duration-300 transform hover:scale-105 focus:outline-none ${sessionStatus === "CONNECTED"
+          ? "bg-red-500 hover:bg-red-600 shadow-red-500/30"
+          : sessionStatus === "CONNECTING"
+            ? "bg-orange-400 hover:bg-orange-500"
+            : "bg-orange hover:bg-orange-400 shadow-orange/30"}`}
+        aria-label={
+          sessionStatus === "CONNECTED"
+            ? "End Connection"
+            : sessionStatus === "CONNECTING"
+              ? "Connecting..."
+              : "Start Connection"
+        }
+      >
+        {sessionStatus === "CONNECTED" ? (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : sessionStatus === "CONNECTING" ? (
+          <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+        )}
+      </button>
+
+      {/* Floating Transcript Panel */}
+      {sessionStatus === "CONNECTED" && (
+        <div className="fixed bottom-24 right-6 z-[9998] w-96 h-96 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-zinc-200">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold">النص المكتوب</h3>
+              <button
+                onClick={() => setSessionStatus("DISCONNECTED")}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <Transcript
+                userText={userText}
+                setUserText={setUserText}
+                onSendMessage={handleSendTextMessage}
+                canSend={sessionStatus === "CONNECTED"}
+                downloadRecording={downloadRecording}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Reminder Popup */}
+      {showEmailReminder && (
+        <div className="fixed top-4 right-4 z-[10000] w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in-down">
+          <div className="p-4">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-orange-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-orange-800">مهم</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowEmailReminder(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="mt-2">
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">قبل إنهاء المكالمة،</span> يرجى التأكد من استلام البريد الإلكتروني. إذا لم تره في بريدك الوارد، اطلب من الوكيل إعادة إرساله.
+              </p>
+            </div>
+          </div>
+          <div className="bg-gray-50 px-4 py-3 rounded-b-lg">
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowEmailReminder(false)}
+                className="text-sm font-medium text-orange-700 hover:text-orange-800"
+              >
+                تجاهل
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main>
+        <Hero
           userText={userText}
           setUserText={setUserText}
           onSendMessage={handleSendTextMessage}
           canSend={sessionStatus === "CONNECTED"}
           downloadRecording={downloadRecording}
+          onToggleConnection={onToggleConnection}
         />
         <Partners />
       </main>
-      <Footer />
-      <div className="p-5 text-lg font-semibold flex justify-between items-center">
+      <Footer  />
+      <div className="p-5 text-lg font-semibold flex justify-between items-center hidden">
         <div
           className="flex items-center cursor-pointer"
           onClick={() => window.location.reload()}
@@ -676,7 +702,7 @@ function App() {
             />
           </div>
           <div>
-            
+
           </div>
         </div >
         <div className="flex items-center hidden">
