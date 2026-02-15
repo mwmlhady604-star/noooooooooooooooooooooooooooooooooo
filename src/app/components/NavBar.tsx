@@ -29,7 +29,7 @@ const NavBar: React.FC<NavBarProps> = ({ onToggleConnection }) => {
   const navItems = [
 
     { label: 'تحميل الدليل (PDF)', href: '/brm.pdf', download: true },
-    { label: 'من نحن', href: '#about' },
+    { label: 'من نحن', href: 'https://makersiq.org/about' },
   ];
 
   // Mega menu content data

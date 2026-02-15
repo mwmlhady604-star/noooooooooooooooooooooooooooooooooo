@@ -20,8 +20,6 @@ A new tool has been added to handle the conversation closure process:
 - **Description**: Handles conversation closure by confirming collected information with the user and setting email preferences
 - **Parameters**:
   - `clientName`: Full name of the client
-  - `nationalId`: National ID number of the client
-  - `phoneNumber`: Personal phone number of the client
   - `email`: Email address of the client for sending confirmation
   - `businessType`: Type of Business Activity
   - `businessName`: Preferred Business Name
@@ -31,10 +29,8 @@ A new tool has been added to handle the conversation closure process:
   - `initialCapital`: Initial Capital Estimate
   - `expectedEmployees`: Number of Expected Employees
   - `businessAddress`: Business Address
-  - `businessPhone`: Business Phone Number
-  - `businessEmail`: Business Email
   - `websiteOrSocialMedia`: Website or Social Media (if applicable)
-  - `specificQuestions`: Specific Questions about Registration Process
+  - `specificQuestions`: The user s exact question(s) about business registration in Iraq
   - `registrationTimeline`: Timeline for Registration
   - `budgetForFees`: Budget for Registration Fees
   - `specialRequirements`: Special Requirements

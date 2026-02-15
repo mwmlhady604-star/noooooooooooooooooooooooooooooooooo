@@ -6,8 +6,6 @@
 // Mock data for testing
 const mockClientData = {
   clientName: "أحمد محمد",
-  nationalId: "12345678901234",
-  phoneNumber: "+964 770 123 4567",
   email: "ahmed.mohammed@email.com",
   businessType: "تجاري",
   businessName: "محل أحمد للأجهزة",
@@ -17,8 +15,6 @@ const mockClientData = {
   initialCapital: 5000000,
   expectedEmployees: 3,
   businessAddress: "شارع الكرادة، بغداد",
-  businessPhone: "+964 1 234 5678",
-  businessEmail: "info@ahmed-shop.com",
   websiteOrSocialMedia: "@ahmed_shop",
   specificQuestions: "ما هي الوثائق المطلوبة لتسجيل المحل؟",
   registrationTimeline: "خلال شهر",

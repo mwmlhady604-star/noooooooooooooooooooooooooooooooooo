@@ -1,3 +1,4 @@
+//index.ts
 import { RealtimeAgent, tool } from '@openai/agents/realtime'
 import { getNextResponseFromSupervisor } from './supervisorAgent';
 import { createClient } from '@supabase/supabase-js';
@@ -33,14 +34,6 @@ export const saveClientInformation = tool({
       clientName: {
         type: 'string',
         description: 'Full name of the client'
-      },
-      nationalId: {
-        type: 'string',
-        description: 'National ID number of the client'
-      },
-      phoneNumber: {
-        type: 'string',
-        description: 'Personal phone number of the client'
       },
       email: {
         type: 'string',
@@ -78,21 +71,13 @@ export const saveClientInformation = tool({
         type: 'string',
         description: 'Business Address (Current or Planned)'
       },
-      businessPhone: {
-        type: 'string',
-        description: 'Business Phone Number'
-      },
-      businessEmail: {
-        type: 'string',
-        description: 'Business Email'
-      },
       websiteOrSocialMedia: {
         type: 'string',
         description: 'Website or Social Media (if applicable)'
       },
       specificQuestions: {
         type: 'string',
-        description: 'Specific Questions about Registration Process'
+        description: 'The user s exact question(s) about business registration in Iraq'
       },
       registrationTimeline: {
         type: 'string',
@@ -107,7 +92,7 @@ export const saveClientInformation = tool({
         description: 'Special Requirements (Trademark, Environmental Approval, etc.)'
       }
     },
-    required: ['clientName', 'nationalId', 'phoneNumber'],
+    required: ['clientName'],
     additionalProperties: false
   },
   execute: async (params: any) => {
@@ -160,8 +145,6 @@ export const saveClientInformation = tool({
     // 🟢 نعمل mapping من camelCase → snake_case
     const mappedParams: any = {
       client_name: params.clientName,
-      national_id: params.nationalId,
-      phone_number: params.phoneNumber,
       email: params.email,
       business_type: params.businessType,
       business_name: params.businessName,
@@ -171,8 +154,6 @@ export const saveClientInformation = tool({
       initial_capital: params.initialCapital,
       expected_employees: params.expectedEmployees,
       business_address: params.businessAddress,
-      business_phone: params.businessPhone,
-      business_email: params.businessEmail,
       website_or_social_media: params.websiteOrSocialMedia,
       specific_questions: params.specificQuestions,
       registration_timeline: params.registrationTimeline,
@@ -234,14 +215,6 @@ export const sendProgressEmail = tool({
         type: 'string',
         description: 'Full name of the client'
       },
-      nationalId: {
-        type: 'string',
-        description: 'National ID number of the client'
-      },
-      phoneNumber: {
-        type: 'string',
-        description: 'Personal phone number of the client'
-      },
       businessType: {
         type: 'string',
         description: 'Type of Business Activity (Commercial, Industrial, Agricultural, Service)'
@@ -274,21 +247,13 @@ export const sendProgressEmail = tool({
         type: 'string',
         description: 'Business Address (Current or Planned)'
       },
-      businessPhone: {
-        type: 'string',
-        description: 'Business Phone Number'
-      },
-      businessEmail: {
-        type: 'string',
-        description: 'Business Email'
-      },
       websiteOrSocialMedia: {
         type: 'string',
         description: 'Website or Social Media (if applicable)'
       },
       specificQuestions: {
         type: 'string',
-        description: 'Specific Questions about Registration Process'
+        description: 'The user s exact question(s) about business registration in Iraq'
       },
       registrationTimeline: {
         type: 'string',
@@ -327,8 +292,6 @@ export const sendProgressEmail = tool({
             <h3>Personal Information</h3>
             <ul>
               <li>Name: ${params.clientName || 'Not provided'}</li>
-              <li>National ID: ${params.nationalId || 'Not provided'}</li>
-              <li>Phone: ${params.phoneNumber || 'Not provided'}</li>
             </ul>
             
             <h3>Business Information</h3>
@@ -372,14 +335,6 @@ export const handleConversationClosure = tool({
         type: 'string',
         description: 'Full name of the client'
       },
-      nationalId: {
-        type: 'string',
-        description: 'National ID number of the client'
-      },
-      phoneNumber: {
-        type: 'string',
-        description: 'Personal phone number of the client'
-      },
       email: {
         type: 'string',
         description: 'Email address of the client for sending confirmation'
@@ -416,21 +371,13 @@ export const handleConversationClosure = tool({
         type: 'string',
         description: 'Business Address (Current or Planned)'
       },
-      businessPhone: {
-        type: 'string',
-        description: 'Business Phone Number'
-      },
-      businessEmail: {
-        type: 'string',
-        description: 'Business Email'
-      },
       websiteOrSocialMedia: {
         type: 'string',
         description: 'Website or Social Media (if applicable)'
       },
       specificQuestions: {
         type: 'string',
-        description: 'Specific Questions about Registration Process'
+        description: 'The user s exact question(s) about business registration in Iraq'
       },
       registrationTimeline: {
         type: 'string',
@@ -455,7 +402,7 @@ export const handleConversationClosure = tool({
         description: 'User preference for information delivery'
       }
     },
-    required: ['clientName', 'phoneNumber', 'businessType', 'businessName', 'confirmationStatus'],
+    required: ['clientName', 'businessType', 'businessName', 'confirmationStatus'],
     additionalProperties: false
   },
   execute: async (params: any) => {
@@ -489,13 +436,48 @@ export const handleConversationClosure = tool({
     // If the user has confirmed and chosen a delivery preference, send the email
     if (params.confirmationStatus === 'confirmed' && params.deliveryPreference && params.email) {
       try {
+        // Prepare the email content based on the user's preference
+        let subject = '';
+        let html = '';
+
+        if (params.deliveryPreference === 'pdf') {
+          // Send PDF information
+          subject = 'Your Business Registration Information - PDF Ready';
+          html = `
+            <h2>Business Registration Information</h2>
+            <p>Hello ${params.clientName || 'Valued Customer'},</p>
+            <p>Your business registration information has been prepared as a PDF document.</p>
+            <p>We will send you the PDF shortly.</p>
+            <p>Best regards,<br>The Business Registration Team</p>
+          `;
+        } else if (params.deliveryPreference === 'step_by_step') {
+          // Send step-by-step information
+          subject = 'Business Registration Steps - Guide';
+          html = `
+            <h2>Business Registration Steps Guide</h2>
+            <p>Hello ${params.clientName || 'Valued Customer'},</p>
+            <p>Here are the step-by-step instructions for business registration in Iraq:</p>
+            <ol>
+              <li>Prepare required documents</li>
+              <li>Choose business structure</li>
+              <li>Register with relevant authorities</li>
+              <li>Obtain necessary licenses</li>
+            </ol>
+            <p>Best regards,<br>The Business Registration Team</p>
+          `;
+        }
+
         // Call the email API to send the confirmation email
         const response = await fetch('/api/email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(params),
+          body: JSON.stringify({
+            email: params.email,
+            subject,
+            html
+          }),
         });
         
         const result = await response.json();
@@ -558,8 +540,6 @@ export const chatAgent = new RealtimeAgent({
 
   2️⃣ Personal Information
   - Full Name
-  - National ID
-  - Phone Number
   ]
 
   3️⃣ Business Structure Information
@@ -570,12 +550,10 @@ export const chatAgent = new RealtimeAgent({
 
   4️⃣ Operational Information
   - Business Address (Current or Planned)
-  - Business Phone Number
-  - Business Email
   - Website or Social Media (if applicable)
 
   5️⃣ Specific Requirements
-  - Specific Questions about Registration Process
+  - The user s exact question(s) about business registration in Iraq
   - Timeline for Registration
   - Budget for Registration Fees
   - Special Requirements (Trademark, Environmental Approval, etc.)
@@ -592,7 +570,7 @@ export const chatAgent = new RealtimeAgent({
   Once you have collected all the necessary information from the user, including their email as the final piece, you should:
 
   1. Summarize all collected information in a friendly and clear manner in Iraqi Arabic, for example:
-     "زين، حتى أتأكد وياك، انت اسمك {clientName}، رقمك {phoneNumber}، نوع النشاط {businessType}، واسم المشروع {businessName}، صح لو أكو شي تحتاج أعدله؟"
+     "زين، حتى أتأكد وياك، انت اسمك {clientName}، نوع النشاط {businessType}، واسم المشروع {businessName}، صح لو أكو شي تحتاج أعدله؟"
 
   2. If the user confirms the information is correct, ask:
      "تحب أرسللك طريقة التسجيل خطوة بخطوة أو نسخة PDF من معلوماتك؟"
@@ -632,6 +610,19 @@ export const chatAgent = new RealtimeAgent({
   Repeat or clarify information if asked.
 
   Collect user information needed for business registration inquiries.
+
+  # Out-of-Scope Questions Policy
+
+  CRITICAL: If a user asks a question that is NOT covered by the ILO business registration knowledge base (the topics listed under "Specialized Knowledge Areas" above), you MUST:
+
+  1. Politely tell the user in Iraqi Arabic that you do not have enough information to answer their question accurately. For example:
+     "عذراً، هذا السؤال خارج نطاق المعلومات المتوفرة عدي. ما أكدر أعطيك جواب دقيق عليه."
+  2. Advise them to consult a qualified legal advisor or lawyer. For example:
+     "أنصحك تستشير محامي أو مستشار قانوني متخصص بالقانون العراقي حتى تحصل على معلومات دقيقة وموثوقة."
+  3. Do NOT attempt to answer, guess, or provide general information. Incorrect legal or financial information can have serious consequences for the user.
+  4. You may offer to help with any topic that IS within your knowledge base scope.
+
+  This applies even for questions that seem related to business but are not explicitly covered in the ILO guide, such as specific court rulings, sector-specific regulations not in the guide, foreign investment details, banking regulations, or labor disputes.
 
   # getNextResponseFromSupervisor Usage
 

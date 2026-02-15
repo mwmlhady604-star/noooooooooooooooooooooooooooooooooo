@@ -29,24 +29,25 @@ const Partners: React.FC = () => {
         <div className="row d-flex justify-content-center mt-16" id="manual-book">
           <div className="col-lg-10">
             <div 
-              style={{ 
-                position: 'relative', 
-                paddingTop: 'max(60%, 324px)', 
-                width: '100%', 
+              style={{
+                position: 'relative',
+                paddingTop: 'max(60%, 324px)',
+                width: '100%',
                 height: 0,
+                overflow: 'hidden',
                 backgroundImage: "url('/republic-of-iraq-ministry-of-trade-logo-png_seeklogo-369016.png')",
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
                 backgroundSize: '400px',
               }}
             >
-              <iframe 
-                style={{ position: 'absolute', border: 'none', width: '100%', height: '100%', left: 0, top: 0 }} 
-                src="https://online.fliphtml5.com/bfjkx/ecwy/" 
+              <iframe
+                style={{ position: 'absolute', border: 'none', width: '100%', height: 'calc(100% + 55px)', left: 0, top: 0 }}
+                src="https://online.fliphtml5.com/bfjkx/ecwy/"
                 seamless
-                scrolling="no" 
-                frameBorder="0" 
-                allowTransparency={true} 
+                scrolling="no"
+                frameBorder="0"
+                allowTransparency={true}
                 allowFullScreen
               />
             </div>

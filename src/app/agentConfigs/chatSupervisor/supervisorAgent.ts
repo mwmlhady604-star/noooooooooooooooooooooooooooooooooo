@@ -1,3 +1,4 @@
+// supervisorAgent.ts
 import { tool } from '@openai/agents/realtime';
 
 // Import the Iraq business registration knowledge base
@@ -38,7 +39,7 @@ You have comprehensive knowledge about registering small and medium enterprises 
 
 ## Information Collection
 When users inquire about business registration, guide the junior agent to collect the following information naturally:
-- Personal details (name, national ID, phone, email)
+- Personal details (name, email)
 - Business information (type, name, location, structure)
 - Operational details (capital, employees, address)
 - Specific requirements and timeline
@@ -152,6 +153,17 @@ For multiple sources: [TOPIC1, TOPIC2]
 
 Only provide information about Iraq business registration based on the official knowledge base. Do not answer questions outside this scope.
 
+# Out-of-Scope Questions Policy
+
+CRITICAL: You must STRICTLY limit your responses to information contained in the ILO business registration knowledge base (iraqBusinessRegistrationKnowledge). If a user asks a question that falls outside the documented knowledge base — including but not limited to specific legal interpretations, court rulings, sector-specific regulations not covered in the guide, foreign investment laws, banking regulations, labor disputes, or any topic not explicitly addressed in the knowledge base — you MUST:
+
+1. Clearly state: "I do not have sufficient information in my knowledge base to provide an accurate answer to this question."
+2. Advise the user: "For detailed and reliable guidance on this matter, I strongly recommend consulting a qualified legal advisor or lawyer who specializes in Iraqi business law."
+3. Do NOT attempt to guess, speculate, or provide general information from outside the knowledge base. Given the legal sensitivity of company registration and financial regulations, providing incorrect information may mislead users and result in serious legal or financial consequences.
+4. You may offer to help with any related topic that IS covered in the knowledge base.
+
+This policy applies even if you have general knowledge about the topic. You must only rely on the verified ILO guide content retrieved through the getIraqBusinessRegistrationInfo tool.
+
 # Important Notes
 
 - Always verify that email is collected before sending any information
@@ -237,14 +249,6 @@ export const supervisorAgentTools = [
           type: "string",
           description: "Full name of the client"
         },
-        nationalId: {
-          type: "string",
-          description: "National ID number of the client"
-        },
-        phoneNumber: {
-          type: "string",
-          description: "Personal phone number of the client"
-        },
         email: {
           type: "string",
           description: "Email address of the client for sending confirmation"
@@ -260,6 +264,14 @@ export const supervisorAgentTools = [
         businessLocation: {
           type: "string",
           description: "Business Location (City/Province)"
+        },
+        currentRegistrationStep: {
+          type: "string",
+          description: "Where the client is in the registration process"
+        },
+        registrationAssistanceRequested: {
+          type: "string",
+          description: "What help the client wants (documents, steps, fees, timeline...)"
         },
         businessStructure: {
           type: "string",
@@ -281,21 +293,13 @@ export const supervisorAgentTools = [
           type: "string",
           description: "Business Address (Current or Planned)"
         },
-        businessPhone: {
-          type: "string",
-          description: "Business Phone Number"
-        },
-        businessEmail: {
-          type: "string",
-          description: "Business Email"
-        },
         websiteOrSocialMedia: {
           type: "string",
           description: "Website or Social Media (if applicable)"
         },
         specificQuestions: {
           type: "string",
-          description: "Specific Questions about Registration Process"
+          description: "The user s exact question(s) about business registration in Iraq"
         },
         registrationTimeline: {
           type: "string",
@@ -320,7 +324,7 @@ export const supervisorAgentTools = [
           description: "User preference for information delivery"
         }
       },
-      required: ["clientName", "phoneNumber", "businessType", "businessName", "confirmationStatus"],
+      required: ["clientName", "businessType", "businessName", "confirmationStatus"],
       additionalProperties: false
     },
   }
@@ -350,26 +354,33 @@ function getToolResponse(fName: string, args: any) {
     case "getIraqBusinessRegistrationInfo":
       // If a specific topic is requested, filter the knowledge base
       if (args.topic) {
+        // Normalize the topic by replacing underscores with spaces for flexible matching
+        const normalizedTopic = args.topic.toLowerCase().replace(/_/g, ' ');
         const filteredKnowledge = iraqBusinessRegistrationKnowledgeArray.filter(item => {
-          // Match by topic key
-          if (item.topic.toLowerCase().includes(args.topic.toLowerCase())) {
+          const itemTopic = item.topic.toLowerCase();
+          const itemName = item.name.toLowerCase();
+          // Match by topic key (both directions for partial matches)
+          if (itemTopic.includes(normalizedTopic) || normalizedTopic.includes(itemTopic)) {
             return true;
           }
           // Match by name
-          if (item.name.toLowerCase().includes(args.topic.toLowerCase())) {
+          if (itemName.includes(normalizedTopic) || normalizedTopic.includes(itemName)) {
             return true;
           }
           // Match by content
-          if (item.content.toLowerCase().includes(args.topic.toLowerCase())) {
+          if (item.content.toLowerCase().includes(normalizedTopic)) {
             return true;
           }
           return false;
         });
         
-        // If no specific matches found, return all knowledge with the topic highlighted
+        // If no specific matches found, return an out-of-scope response
         if (filteredKnowledge.length === 0) {
-          console.log(`No specific matches found for topic: ${args.topic}. Returning all knowledge.`);
-          return iraqBusinessRegistrationKnowledgeArray;
+          console.log(`No specific matches found for topic: ${args.topic}. Topic is out of scope.`);
+          return {
+            outOfScope: true,
+            message: `No information found for topic "${args.topic}" in the ILO business registration knowledge base. This question falls outside the scope of the documented guide. You must inform the user that you do not have sufficient information to provide an accurate answer and strongly recommend they consult a qualified legal advisor or lawyer specializing in Iraqi business law. Do NOT attempt to answer from general knowledge.`
+          };
         }
         
         return filteredKnowledge;

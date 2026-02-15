@@ -5,8 +5,6 @@
 
 export interface BusinessRegistrationInfo {
   clientName: string;
-  nationalId: string;
-  phoneNumber: string;
   email: string;
   businessType: string;
   businessName: string;
@@ -16,8 +14,6 @@ export interface BusinessRegistrationInfo {
   initialCapital?: number;
   expectedEmployees?: number;
   businessAddress: string;
-  businessPhone: string;
-  businessEmail: string;
   websiteOrSocialMedia?: string;
   specificQuestions?: string;
   registrationTimeline: string;
@@ -41,8 +37,6 @@ export async function generateBusinessRegistrationPDF(info: BusinessRegistration
   doc.moveDown();
   
   doc.fontSize(12).text(`Client Name: ${info.clientName}`);
-  doc.text(`National ID: ${info.nationalId}`);
-  doc.text(`Phone Number: ${info.phoneNumber}`);
   doc.text(`Email: ${info.email}`);
   // ... add all other fields
   
@@ -63,8 +57,6 @@ Business Registration Information
 =================================
 
 Client Name: ${info.clientName}
-National ID: ${info.nationalId}
-Phone Number: ${info.phoneNumber}
 Email: ${info.email}
 
 Business Information:
@@ -77,11 +69,9 @@ Number of Partners: ${info.numberOfPartners || 'N/A'}
 Initial Capital: ${info.initialCapital || 'N/A'}
 Expected Employees: ${info.expectedEmployees || 'N/A'}
 
-Business Contact:
+Business Address:
 -----------------
-Address: ${info.businessAddress}
-Phone: ${info.businessPhone}
-Email: ${info.businessEmail}
+${info.businessAddress}
 Website/Social Media: ${info.websiteOrSocialMedia || 'N/A'}
 
 Additional Information:
@@ -111,14 +101,6 @@ export function generateBusinessRegistrationHTML(info: BusinessRegistrationInfo)
           <tr>
             <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold; width: 30%;">الاسم الكامل</td>
             <td style="border: 1px solid #ddd; padding: 10px;">${info.clientName}</td>
-          </tr>
-          <tr>
-            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">الرقم الوطني</td>
-            <td style="border: 1px solid #ddd; padding: 10px;">${info.nationalId}</td>
-          </tr>
-          <tr>
-            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">رقم الهاتف</td>
-            <td style="border: 1px solid #ddd; padding: 10px;">${info.phoneNumber}</td>
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">البريد الإلكتروني</td>
@@ -162,19 +144,11 @@ export function generateBusinessRegistrationHTML(info: BusinessRegistrationInfo)
       </div>
       
       <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h3 style="color: #333; border-bottom: 2px solid #2c5aa0; padding-bottom: 10px;">معلومات الاتصال بالمشروع</h3>
+        <h3 style="color: #333; border-bottom: 2px solid #2c5aa0; padding-bottom: 10px;">عنوان المشروع</h3>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
             <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold; width: 30%;">العنوان</td>
             <td style="border: 1px solid #ddd; padding: 10px;">${info.businessAddress}</td>
-          </tr>
-          <tr>
-            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">هاتف المشروع</td>
-            <td style="border: 1px solid #ddd; padding: 10px;">${info.businessPhone}</td>
-          </tr>
-          <tr>
-            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">بريد المشروع</td>
-            <td style="border: 1px solid #ddd; padding: 10px;">${info.businessEmail}</td>
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">الموقع أو وسائل التواصل</td>
