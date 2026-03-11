@@ -347,9 +347,20 @@ function App() {
       },
     });
 
-    // Send an initial 'hi' message to trigger the agent to greet the user
+    // Send an initial message with user type context to trigger the agent to greet the user
     if (shouldTriggerResponse) {
-      sendSimulatedUserMessage('hi');
+      const storedUserType = localStorage.getItem("userType") || userType;
+      const userTypeLabels: Record<string, string> = {
+        individual_entrepreneur: "رائد أعمال فردي",
+        existing_company: "شركة قائمة",
+        student_researcher: "طالب أو باحث",
+        consultant_employee: "مستشار أو موظف",
+      };
+      const label = userTypeLabels[storedUserType] || storedUserType;
+      const greeting = storedUserType
+        ? `مرحباً، أنا ${label}`
+        : "hi";
+      sendSimulatedUserMessage(greeting);
     }
     return;
   }
@@ -509,6 +520,55 @@ function App() {
 
   const agentSetKey = searchParams.get("agentConfig") || "default";
 
+  // State for user type identification modal
+  const [showUserTypeModal, setShowUserTypeModal] = useState(false);
+  const [userType, setUserType] = useState<string>("");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("userType");
+    if (stored) {
+      setUserType(stored);
+    } else {
+      setShowUserTypeModal(true);
+    }
+  }, []);
+
+  const handleUserTypeSelect = (type: string) => {
+    setUserType(type);
+    localStorage.setItem("userType", type);
+    setShowUserTypeModal(false);
+  };
+
+  const handleResetUserType = () => {
+    setUserType("");
+    localStorage.removeItem("userType");
+    setShowUserTypeModal(true);
+  };
+
+  const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
+
+  const handleQuickQuestion = (question: string) => {
+    if (sessionStatus === "CONNECTED") {
+      interrupt();
+      sendUserText(question);
+    } else {
+      setPendingQuestion(question);
+      connectToRealtime();
+    }
+  };
+
+  useEffect(() => {
+    if (sessionStatus === "CONNECTED" && pendingQuestion) {
+      const q = pendingQuestion;
+      setPendingQuestion(null);
+      // Small delay to let the session fully settle before injecting the question
+      setTimeout(() => {
+        interrupt();
+        sendUserText(q);
+      }, 1500);
+    }
+  }, [sessionStatus, pendingQuestion]);
+
   // State for email reminder popup
   const [showEmailReminder, setShowEmailReminder] = useState(false);
 
@@ -530,7 +590,34 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      <NavBar onToggleConnection={onToggleConnection} />
+      <NavBar onToggleConnection={onToggleConnection} userType={userType} onResetUserType={handleResetUserType} />
+
+      {/* User Type Identification Modal */}
+      {showUserTypeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[99999]">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4" dir="rtl">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">مرحباً بك!</h2>
+            <p className="text-gray-500 text-center mb-6">حدد وصفك لنتمكن من تخصيص تجربتك</p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "رائد أعمال فردي", icon: "👤", value: "individual_entrepreneur" },
+                { label: "شركة قائمة", icon: "🏢", value: "existing_company" },
+                { label: "طالب / باحث", icon: "🎓", value: "student_researcher" },
+                { label: "مستشار / موظف", icon: "💼", value: "consultant_employee" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleUserTypeSelect(option.value)}
+                  className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-gray-200 hover:border-orange-400 hover:bg-orange-50 transition-all duration-200 text-center group"
+                >
+                  <span className="text-3xl">{option.icon}</span>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-orange-700">{option.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* WhatsApp-like Calling Interface */}
       {showRingingInterface && (
@@ -626,6 +713,7 @@ function App() {
                 onSendMessage={handleSendTextMessage}
                 canSend={sessionStatus === "CONNECTED"}
                 downloadRecording={downloadRecording}
+                onSendQuickMessage={(text) => { interrupt(); sendUserText(text); }}
               />
             </div>
           </div>
@@ -683,6 +771,7 @@ function App() {
           canSend={sessionStatus === "CONNECTED"}
           downloadRecording={downloadRecording}
           onToggleConnection={onToggleConnection}
+          onQuickQuestion={handleQuickQuestion}
         />
         <Partners />
       </main>

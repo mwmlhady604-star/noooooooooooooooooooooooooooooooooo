@@ -5,6 +5,15 @@ import { FiPhone, FiPhoneOff, FiChevronDown } from "react-icons/fi";
 
 type NavBarProps = {
   onToggleConnection: () => void;
+  userType?: string;
+  onResetUserType?: () => void;
+};
+
+const userTypeLabels: Record<string, { label: string; icon: string }> = {
+  individual_entrepreneur: { label: "رائد أعمال فردي", icon: "👤" },
+  existing_company:        { label: "شركة قائمة",       icon: "🏢" },
+  student_researcher:      { label: "طالب / باحث",      icon: "🎓" },
+  consultant_employee:     { label: "مستشار / موظف",    icon: "💼" },
 };
 
 // Define types for mega menu items
@@ -22,7 +31,7 @@ type MegaMenuContent = {
   [key: string]: MegaMenuItem[];
 };
 
-const NavBar: React.FC<NavBarProps> = ({ onToggleConnection }) => {
+const NavBar: React.FC<NavBarProps> = ({ onToggleConnection, userType, onResetUserType }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
@@ -126,6 +135,21 @@ const NavBar: React.FC<NavBarProps> = ({ onToggleConnection }) => {
               </div>
             ))}
           </div>
+
+          {/* User Type Chip */}
+          {userType && userTypeLabels[userType] && (
+            <button
+              onClick={onResetUserType}
+              title="تغيير نوع المستخدم"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-sm font-medium hover:bg-orange-100 hover:border-orange-400 transition-all duration-200 group"
+            >
+              <span>{userTypeLabels[userType].icon}</span>
+              <span className="hidden sm:inline">{userTypeLabels[userType].label}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 opacity-50 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+              </svg>
+            </button>
+          )}
 
           {/* Right side buttons */}
           <div className="flex items-center space-x-4 hidden ">

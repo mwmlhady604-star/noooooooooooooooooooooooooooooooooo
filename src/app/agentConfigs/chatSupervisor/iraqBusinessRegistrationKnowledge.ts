@@ -7,6 +7,8 @@ export const iraqBusinessRegistrationKnowledge = {
     id: "IRQ-BUS-INTRO",
     name: "Introduction to Business Registration in Iraq",
     topic: "introduction",
+    pageRef: "ص.1",
+    sectionTitle: "مقدمة — الدليل التجاري",
     content: `Iraq's economy has been affected by wars and conflicts, leading to a decline in productive means and rising economic challenges like unemployment. With a population of 46,118,000 in 2024 and 41.61% economically active, the unemployment rate reached 16.5% with 5.73 million workers in unorganized jobs (one-third of the workforce).
 
 Despite these challenges, Iraq remains a promising investment environment. However, there's a weakness in officially registering businesses. Studies estimate between 377,000 to 840,000 small and micro-enterprises, with 84% operating informally. The World Bank report of 2022 reflects the complexity of establishment procedures, requiring 8-9 procedures and taking 2-4 months. Main reasons for non-registration include lack of knowledge about procedures, high registration fees, and tax avoidance.
@@ -18,6 +20,8 @@ This guide aims to bridge this gap by providing clear instructions on registrati
     id: "IRQ-BUS-BEN",
     name: "Benefits of Formal Registration",
     topic: "benefits",
+    pageRef: "ص.3",
+    sectionTitle: "فوائد التسجيل الرسمي",
     content: `Official registration of your project is not only a legal step but also a strategic one towards building a strong reputation and protecting your rights. Key benefits include:
 
 1. Secure Financial Transactions: Conduct official financial transactions safely and in compliance with laws, open official bank accounts, perform financial transfers, and receive money from customers easily and securely.
@@ -41,6 +45,8 @@ This guide aims to bridge this gap by providing clear instructions on registrati
     id: "IRQ-BUS-STR",
     name: "Choosing the Right Business Structure",
     topic: "business structure",
+    pageRef: "ص.7",
+    sectionTitle: "هياكل الأعمال التجارية",
     content: `Before taking any step to establish, expand, or develop your project, you should realize that formally establishing and registering your project is the foundation that ensures its sustainability and success.
 
 If you have an idea or ambition to launch a private project, or you have an unregistered existing project, it is necessary to choose the most appropriate form for the project, whether it's an office, store, individual project, or a company wholly owned or in partnership with others.
@@ -76,6 +82,8 @@ Factors to consider when choosing the most appropriate form for your project:
     id: "IRQ-BUS-ACT",
     name: "Types of Business Activities",
     topic: "business activities",
+    pageRef: "ص.11",
+    sectionTitle: "الأنشطة التجارية المرخصة",
     content: `### Commercial Projects
 Commercial projects involve establishing and practicing work for profit. An individual can acquire the status of "merchant" and practice commercial work in their name and for their own account or establish a commercial company. Commercial activities include:
 - Buying or renting movable assets (machines, equipment, etc.) and immovable assets (real estate) for the purpose of selling or renting them (including buying, selling, renting, and leasing for profit)
@@ -108,6 +116,8 @@ Service projects practice activities that do not include industrial work or agri
     id: "IRQ-BUS-COM",
     name: "Commercial Name and Trademark",
     topic: "commercial name",
+    pageRef: "ص.14",
+    sectionTitle: "تسجيل الاسم التجاري والعلامة",
     content: `### Commercial Name
 After choosing the organizational form of your project, it's time to choose a commercial name. Choosing a commercial name is not just a legal step, but it is the foundation for building a strong reputation in the market. The commercial name is the interface through which your customers will recognize you.
 
@@ -142,6 +152,8 @@ Trademark registration is done at the Trademark Directorate in the Economic Depa
     id: "IRQ-BUS-REG",
     name: "Registration Procedures",
     topic: "registration procedures",
+    pageRef: "ص.17",
+    sectionTitle: "إجراءات التسجيل",
     content: `### Registration as an Office or Store
 Requirements for registering offices or stores:
 - Lease contract for the store or office
@@ -214,6 +226,8 @@ Industrial projects receive many advantages:
     id: "IRQ-BUS-ENV",
     name: "Environmental Compliance",
     topic: "environmental compliance",
+    pageRef: "ص.23",
+    sectionTitle: "الامتثال البيئي",
     content: `Most project registrations require obtaining approval from the Ministry of Environment to provide environmental requirements and standards to limit negative impacts. Environmental approval is a basic condition for establishing all industrial projects.
 
 Projects are classified into categories (A), (B), and (C). Category (A) has large negative impacts and affects living organisms and extends beyond the project's boundaries, while category (C) has little or no negative impacts.
@@ -235,6 +249,8 @@ These classifications are based on the environmental impacts associated with the
     id: "IRQ-BUS-INT",
     name: "Intellectual Property Protection",
     topic: "intellectual property",
+    pageRef: "ص.27",
+    sectionTitle: "الملكية الفكرية وحماية العلامات",
     content: `Registering your project provides legal protection for your project and its reputation from unfair competition, protects your project, its reputation, and the goods and services it provides from imitation, and prevents others from using your name or trademark illegally.
 
 Registering your products according to the law can provide you with a material resource through granting licenses to use them by others or selling them and transferring their ownership. You can also take legal action against anyone who tries to compete with you unfairly and obtain financial compensation for damages caused to you.
@@ -313,6 +329,8 @@ Documents required for fully incorporated companies:
     id: "IRQ-BUS-TAX",
     name: "Tax Obligations",
     topic: "tax obligations",
+    pageRef: "ص.31",
+    sectionTitle: "الالتزامات الضريبية",
     content: `Understanding the tax system in Iraq is essential as income tax is the main source of Iraqi government revenue. Compliance with tax regulations means avoiding fines and penalties.
 
 ### Income Tax on Projects in Iraq
@@ -360,6 +378,8 @@ If you are about to register your company, you must follow these steps:
     id: "IRQ-BUS-SOC",
     name: "Social Security Registration",
     topic: "social security",
+    pageRef: "ص.36",
+    sectionTitle: "الضمان الاجتماعي",
     content: `### Why Should You Register Your Project?
 Registering your project or business with the Retirement and Social Security Directorate for workers creates a legal and stable environment, increasing the chances of success for small and medium enterprises.
 
@@ -422,6 +442,8 @@ Project owners can subscribe to the optional retirement insurance system through
     id: "IRQ-BUS-RES",
     name: "Useful Resources",
     topic: "resources",
+    pageRef: "ص.40",
+    sectionTitle: "الموارد والجهات المختصة",
     content: `### Relevant Websites:
 1. Ministry of Commerce - Companies Registration Department: https://tasjeel.mot.gov.iq/newtasjeel
 2. Ministry of Labor and Social Affairs: www.molsa.gov.iq

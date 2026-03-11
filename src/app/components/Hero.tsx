@@ -5,6 +5,15 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import emailjs from '@emailjs/browser';
 import styles from './Hero.module.css';
 
+const QUICK_QUESTIONS = [
+  { label: "أنواع تسجيل الشركات", question: "ما هي أنواع تسجيل الشركات المتاحة في العراق؟" },
+  { label: "أقل تكلفة للتسجيل", question: "ما هو أقل تكلفة لتسجيل الشركة؟" },
+  { label: "مدة التسجيل", question: "كم تستغرق عملية تسجيل الشركة؟" },
+  { label: "فرق الصغيرة والمتوسطة", question: "ما الفرق بين الشركات الصغيرة والمتوسطة؟" },
+  { label: "متطلبات التسجيل", question: "ما هي المتطلبات الأساسية لتسجيل شركة؟" },
+  { label: "مشروع فردي", question: "كيف أسجل مشروعاً تجارياً فردياً؟" },
+];
+
 const Hero: React.FC<{
   userText: string;
   setUserText: (val: string) => void;
@@ -12,7 +21,8 @@ const Hero: React.FC<{
   canSend: boolean;
   downloadRecording: () => void;
   onToggleConnection?: () => void;
-}> = ({ userText, setUserText, onSendMessage, canSend, downloadRecording, onToggleConnection }) => {
+  onQuickQuestion?: (question: string) => void;
+}> = ({ userText, setUserText, onSendMessage, canSend, downloadRecording, onToggleConnection, onQuickQuestion }) => {
   const [open, setOpen] = useState(false);       // form modal
   const [openVideo, setOpenVideo] = useState(false); // video modal
   const [status, setStatus] = useState("");
@@ -124,9 +134,8 @@ const Hero: React.FC<{
                     <div className={`absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 ${styles.shimmer}`}></div>
                   </button>
                 </div>
-
-
               </div>
+
             </div>
           </div>
 
@@ -155,6 +164,36 @@ ease-in-out */}
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* FAQ Section — 2 columns */}
+      <div className="bg-[color:var(--background)] border-t border-zinc-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <h2 className="text-xl font-bold text-zinc-900 mb-6">أسئلة شائعة</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-16">
+            {QUICK_QUESTIONS.map((q) => (
+              <button
+                key={q.label}
+                onClick={() => onQuickQuestion?.(q.question)}
+                className="group flex items-center justify-between text-left py-4 border-b border-zinc-100 hover:border-orange-200 transition-colors duration-150"
+              >
+                <span className="text-[15px] font-medium text-zinc-700 group-hover:text-orange-600 transition-colors">{q.label}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-zinc-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0 ml-3" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            ))}
+          </div>
+          <p className="mt-8 text-sm text-zinc-400">
+            لديك سؤال آخر؟{" "}
+            <button
+              onClick={() => onQuickQuestion?.("مرحباً، لدي سؤال")}
+              className="text-orange-500 hover:text-orange-600 font-medium underline underline-offset-2 transition-colors"
+            >
+              تحدث مع المساعد الذكي
+            </button>
+          </p>
         </div>
       </div>
 

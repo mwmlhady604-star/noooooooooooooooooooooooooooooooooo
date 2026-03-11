@@ -5,6 +5,15 @@ import { tool } from '@openai/agents/realtime';
 import { iraqBusinessRegistrationKnowledge, iraqBusinessRegistrationKnowledgeArray } from './iraqBusinessRegistrationKnowledge';
 
 // Iraq Business Registration Knowledge Base Integration
+// Module-level citation store — set when supervisor fetches knowledge,
+// consumed by useHandleSessionHistory when the next assistant message is added.
+let _pendingCitation: string | null = null;
+export function consumePendingCitation(): string | null {
+  const val = _pendingCitation;
+  _pendingCitation = null;
+  return val;
+}
+
 export const iraqBusinessRegistrationTopics = {
   benefits: "benefits_of_registration",
   procedures: "registration_procedures",
@@ -165,6 +174,11 @@ CRITICAL: You must STRICTLY limit your responses to information contained in the
 This policy applies even if you have general knowledge about the topic. You must only rely on the verified ILO guide content retrieved through the getIraqBusinessRegistrationInfo tool.
 
 # Important Notes
+
+## Email Offer After Steps
+After providing any step-by-step registration procedure or detailed requirements list, ALWAYS end your response with:
+"يمكنني إرسال هذه الخطوات إلى بريدك الإلكتروني — هل تريد ذلك؟"
+If the user agrees, call sendSummaryToEmail immediately. If no email collected yet, ask the junior agent to request it first.
 
 - Always verify that email is collected before sending any information
 - Guide users through the step-by-step registration process
@@ -349,7 +363,35 @@ async function fetchResponsesMessage(body: any) {
   return completion;
 }
 
-function getToolResponse(fName: string, args: any) {
+function buildStepsSummaryHtml(args: any): string {
+  const clientName = args.clientName || 'العميل الكريم';
+  const businessType = args.businessType || '';
+  const businessStructure = args.businessStructure || '';
+  return `
+  <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+    <div style="background: #f97316; padding: 24px; border-radius: 8px 8px 0 0;">
+      <h1 style="color: white; margin: 0; font-size: 22px;">خطوات تسجيل مشروعك في العراق</h1>
+      <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0;">دليل ILO للمشاريع الصغيرة والمتوسطة</p>
+    </div>
+    <div style="background: #fff; padding: 24px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;">
+      <p>مرحباً <strong>${clientName}</strong>،</p>
+      <p>فيما يلي ملخص خطوات تسجيل مشروعك${businessType ? ` (${businessType})` : ''}${businessStructure ? ` — ${businessStructure}` : ''} في العراق:</p>
+      <ol style="padding-right: 20px; line-height: 2;">
+        <li>التسجيل في وزارة التجارة أو الجهة المختصة</li>
+        <li>الحصول على الرقم الضريبي من هيئة الضرائب</li>
+        <li>التسجيل في الضمان الاجتماعي للعمال</li>
+        <li>استخراج ترخيص النشاط التجاري من البلدية</li>
+        <li>فتح حساب مصرفي تجاري رسمي</li>
+      </ol>
+      <p style="margin-top: 24px; font-size: 13px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 16px;">
+        هذا الملخص مستند إلى دليل ILO لتسجيل المشاريع الصغيرة والمتوسطة في العراق.
+        للاستفسار، تواصل مع المساعد الذكي أو زر البوابة الرسمية.
+      </p>
+    </div>
+  </div>`;
+}
+
+async function getToolResponse(fName: string, args: any) {
   switch (fName) {
     case "getIraqBusinessRegistrationInfo":
       // If a specific topic is requested, filter the knowledge base
@@ -388,28 +430,27 @@ function getToolResponse(fName: string, args: any) {
       // If no specific topic, return all knowledge
       return iraqBusinessRegistrationKnowledgeArray;
       
-    case "sendSummaryToEmail":
-      // In a real implementation, this would call an email service API
-      console.log('Sending business registration summary to email:', {
-        email: args.email,
-        clientName: args.clientName,
-        businessType: args.businessType,
-        summaryType: args.summaryType,
-        customTopics: args.customTopics
-      });
-      
-      // Simulate email sending
-      return {
-        success: true,
-        message: "Business registration summary sent successfully to email",
-        details: {
-          recipient: args.email,
-          clientName: args.clientName,
-          summaryType: args.summaryType,
-          sentAt: new Date().toISOString(),
-          estimatedDelivery: "1-2 minutes"
+    case "sendSummaryToEmail": {
+      const emailHtml = buildStepsSummaryHtml(args);
+      try {
+        const resp = await fetch('/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: args.email,
+            subject: "خطوات تسجيل مشروعك في العراق — دليل ILO",
+            html: emailHtml,
+          }),
+        });
+        const data = await resp.json();
+        if (data.success) {
+          return { success: true, message: `تم إرسال الخطوات بنجاح إلى ${args.email}` };
         }
-      };
+        return { success: false, error: data.error || "فشل إرسال البريد الإلكتروني" };
+      } catch (e) {
+        return { success: false, error: "حدث خطأ أثناء إرسال البريد الإلكتروني" };
+      }
+    }
       
     case "handleConversationClosure":
       // In a real implementation, this would call the actual handleConversationClosure tool
@@ -439,6 +480,7 @@ async function handleToolCalls(
   addBreadcrumb?: (title: string, data?: any) => void,
 ) {
   let currentResponse = response;
+  let citationMarker: string | null = null; // collected from knowledge tool calls
 
   while (true) {
     if (currentResponse?.error) {
@@ -462,13 +504,26 @@ async function handleToolCalls(
         })
         .join('\n');
 
-      return finalText;
+      // Store citation in module-level var for useHandleSessionHistory to consume
+      if (citationMarker) {
+        _pendingCitation = citationMarker;
+      }
+      return finalText; // clean text — no marker in what the junior agent speaks
     }
 
     for (const toolCall of functionCalls) {
       const fName = toolCall.name;
       const args = JSON.parse(toolCall.arguments || '{}');
-      const toolRes = getToolResponse(fName, args);
+      const toolRes = await getToolResponse(fName, args);
+
+      // Extract citation from the knowledge tool result (first matching item)
+      if (fName === 'getIraqBusinessRegistrationInfo' && !citationMarker) {
+        const items: any[] = Array.isArray(toolRes) ? toolRes : [];
+        if (items.length > 0 && (items[0] as any).pageRef) {
+          const item = items[0] as any;
+          citationMarker = `[REF:${item.pageRef}|${item.sectionTitle || item.name}]`;
+        }
+      }
 
       if (addBreadcrumb) {
         addBreadcrumb(`[supervisorAgent] function call: ${fName}`, args);

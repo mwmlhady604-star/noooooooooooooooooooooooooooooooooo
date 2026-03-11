@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useTranscript } from "../contexts/TranscriptContext";
 import { useEvent } from "../contexts/EventContext";
+import { consumePendingCitation } from "../agentConfigs/chatSupervisor/supervisorAgent";
 
 export function useHandleSessionHistory() {
   const {
@@ -77,12 +78,23 @@ export function useHandleSessionHistory() {
       function_args
     );    
   }
+  // Stores a citation tag extracted from getNextResponseFromSupervisor tool result.
+  // Consumed by handleTranscriptionCompleted when the assistant's audio finishes.
+  const pendingCitationRef = useRef<string | null>(null);
+
   function handleAgentToolEnd(details: any, _agent: any, _functionCall: any, result: any) {
     const lastFunctionCall = extractFunctionCallByName(_functionCall.name, details?.context?.history);
     addTranscriptBreadcrumb(
       `function call result: ${lastFunctionCall?.name}`,
       maybeParseJson(result)
     );
+
+    if (_functionCall.name === 'getNextResponseFromSupervisor') {
+      const parsed = maybeParseJson(result);
+      const text: string = typeof parsed === 'string' ? parsed : (parsed?.nextResponse ?? '');
+      const m = text.match(/\[CITATION:page=([^|]+)\|section=([^\]]+)\]/);
+      if (m) pendingCitationRef.current = m[0];
+    }
   }
 
   function handleHistoryAdded(item: any) {
@@ -106,6 +118,13 @@ export function useHandleSessionHistory() {
         addTranscriptBreadcrumb('Output Guardrail Active', { details: failureDetails });
       } else {
         addTranscriptMessage(itemId, role, text);
+        // Attach citation from module-level store (set by supervisorAgent when knowledge is fetched)
+        if (role === 'assistant') {
+          const citation = consumePendingCitation();
+          if (citation) {
+            updateTranscriptItem(itemId, { data: { citation } });
+          }
+        }
       }
     }
   }
